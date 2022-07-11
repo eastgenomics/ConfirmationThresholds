@@ -8,6 +8,7 @@ Author: Chris Pyatt
 # import libraries
 import argparse
 import re
+from socket import SOL_NETROM
 
 
 def get_args():
@@ -80,31 +81,49 @@ def parseQuery(query):
     '''
     try:
         with open(query) as file:
+            variantDict = {}
             for line in file:
-                if not line.startswith('##'):
+                if not line.startswith('#'):
+                    variant = line.split('\t')[0] + '_' + line.split('\t')[1] + '_' + line.split('\t')[3] + '_' + line.split('\t')[4]
                     vcf_info = line.split('\t')[7].split(';')
                     vcf_format = line.split('\t')[8].split(':')
                     vcf_genotype = line.split('\t')[9].split(':')
+                metricDict = {}
+                for item in vcf_info:
+                    name = 'info_' + item.split('=')[0]
+                    value = item.split('=')[1]
+                    metricDict[name] = value
+                for i in range(len(vcf_format)):
+                    name = 'format_' + vcf_format[i]
+                    value = vcf_genotype[i]
+                    metricDict[name] = value
+                variantDict[variant] = metricDict
     except:
         print('\nError parsing query VCF. Please check format.')
         sys.exit(1)
-    metricDict = {}
-    for item in vcf_info:
-        name = 'info_' + item.split('=')[0]
-        value = item.split('=')[1]
-        metricDict[name] = value
-    for i in [0:len(vcf_format)]:
-        name = 'format_' + vcf_format[i]
-        value = vcf_genotype[i]
-        metricDict[name] = value
-    return metricDict
+    
+    return variantDict
 
 def parseHappy(happy):
     '''
     Takes a Hap.py output vcf containing TP & FP calls. Returns a dictionary of variants paired with TP/FP, SNP/INDEL, & het/hom status.
     '''
-    pass
-
+    try:
+        with open(happy) as file:
+            variantDict = {}
+            for line in file:
+                # ignores other info in file e.g. 'CALL_WEIGHT', 'Genotype', 'variant quality for ROC creation', etc.
+                if not line.startswith('#'):
+                    variant = line.split('\t')[0] + '_' + line.split('\t')[1] + '_' + line.split('\t')[3] + '_' + line.split('\t')[4]
+                    queryInfo = line.split('\t')[10].split(':')
+                    TPFP = queryInfo[1]
+                    SNP_INDEL = queryInfo[5]
+                    hethom = queryInfo[6]
+                variantDict[variant] = [TPFP,SNP_INDEL,hethom]
+    except:
+        print('\nError parsing query VCF. Please check format.')
+        sys.exit(1)
+    return variantDict
 
 def createPlot():
     '''
