@@ -7,6 +7,7 @@ Author: Chris Pyatt
 
 # import libraries
 import argparse
+import re
 
 
 def get_args():
@@ -28,31 +29,41 @@ def get_args():
         '--query',
         help='filename of query VCF (containing variants and metric values). Up to two query sample VCFs may be provided, but if a hap.py VCF is provided via the --happy option, only one (matching) query VCF will be accepted.'
     )
-    parser.add_argument('--metrics',
-        help='list of metrics to be plotted. The list must be comma-separated with no spaces.'
+    parser.add_argument('--metrics', default='all',
+        help='list of metrics to be plotted. The list must be comma-separated with no spaces. By default, all metrics found in the VCF will be plotted.'
     )
     args = parser.parse_args()
     # exit gracefully if no arguments given (or missing either file or output)
-    if args.file == None or args.output == None:
+    if args.query == None or args.output == None:
         parser.print_help()
         sys.exit(1)
     else:
         return args
 
-#parser
-
-#arg happy vcf (optional)
-
-#arg query vcf (at least 1)
-
-#arg list of metrics
-
 
 def checkMetrics(query, metrics):
     '''
-    Takes list of metrics and a query vcf. Checks that all metrics requested are available in query vcf. Returns list of useable metrics for plotting.
+    Takes list of metrics and a query VCF. Checks that all metrics requested are available in query VCF. Returns list of useable metrics for plotting.
     '''
-    pass
+    try:
+        requestedMetrics = metrics.split(',')
+    except:
+        print('\nError parsing metrics. Please check formatting.')
+        sys.exit(1)
+    try:
+        with open(query) as file:
+            allMetrics = []
+            for line in file:
+                if line.startswith('##FORMAT') or line.startswith('##INFO'):
+                    allMetrics.append(line.split(',')[0].split('=')[-1])
+    except:
+        print('\nError parsing query VCF. Please check format.')
+        sys.exit(1)
+    availableMetrics = list(set(requestedMetrics).intersection(allMetrics))
+    if args.verbose:
+        unavailableMetrics = list(set(requestedMetrics).difference(allMetrics))
+        print('\nThe metrics below were requested but not present in the query VCF.\n' + str(unavailableMetrics))
+    return availableMetrics
 
 
 def parseQuery(query):
@@ -98,6 +109,7 @@ def main():
 
     # if happy provided, set variable to True, check query length is 1
     # if no happy, set to False, check query length is 2, parse both
+    # check metrics for each query & merge lists first
 
     # generate output
     pass
