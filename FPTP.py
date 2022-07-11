@@ -52,16 +52,24 @@ def checkMetrics(query, metrics):
         sys.exit(1)
     try:
         with open(query) as file:
-            allMetrics = []
+            allInfoMetrics = []
+            allFormatMetrics = []
+            # parse out metric names - separate info and format metrics in case of identical names (usually DP)
             for line in file:
-                if line.startswith('##FORMAT') or line.startswith('##INFO'):
-                    allMetrics.append(line.split(',')[0].split('=')[-1])
+                if line.startswith('##INFO'):
+                    allInfoMetrics.append(line.split(',')[0].split('=')[-1])
+                elif line.startswith('##FORMAT'):
+                    allFormatMetrics.append(line.split(',')[0].split('=')[-1])
     except:
         print('\nError parsing query VCF. Please check format.')
         sys.exit(1)
-    availableMetrics = list(set(requestedMetrics).intersection(allMetrics))
+    availableInfoMetrics = list(set(requestedMetrics).intersection(allInfoMetrics))
+    availableFormatMetrics = list(set(requestedMetrics).intersection(allFormatMetrics))
+    availableMetrics = [availableInfoMetrics, availableFormatMetrics]
     if args.verbose:
-        unavailableMetrics = list(set(requestedMetrics).difference(allMetrics))
+        unavailableInfoMetrics = list(set(requestedMetrics).difference(allInfoMetrics))
+        unavailableFormatMetrics = list(set(requestedMetrics).difference(allFormatMetrics))
+        unavailableMetrics = [unavailableInfoMetrics, unavailableFormatMetrics]
         print('\nThe metrics below were requested but not present in the query VCF.\n' + str(unavailableMetrics))
     return availableMetrics
 
@@ -70,8 +78,26 @@ def parseQuery(query):
     '''
     Takes a query vcf filename. Returns a dictionary of relevant metrics and values, paired to variants.
     '''
-    pass
-
+    try:
+        with open(query) as file:
+            for line in file:
+                if not line.startswith('##'):
+                    vcf_info = line.split('\t')[7].split(';')
+                    vcf_format = line.split('\t')[8].split(':')
+                    vcf_genotype = line.split('\t')[9].split(':')
+    except:
+        print('\nError parsing query VCF. Please check format.')
+        sys.exit(1)
+    metricDict = {}
+    for item in vcf_info:
+        name = 'info_' + item.split('=')[0]
+        value = item.split('=')[1]
+        metricDict[name] = value
+    for i in [0:len(vcf_format)]:
+        name = 'format_' + vcf_format[i]
+        value = vcf_genotype[i]
+        metricDict[name] = value
+    return metricDict
 
 def parseHappy(happy):
     '''
