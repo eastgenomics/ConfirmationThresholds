@@ -8,6 +8,7 @@ Author: Chris Pyatt
 # import libraries
 import argparse
 import re
+import sys
 
 
 def get_args():
@@ -34,12 +35,17 @@ def get_args():
     )
     args = parser.parse_args()
     # exit gracefully if no arguments given or number of input files is not 2
-    if args.query == None or args.output == None:
+    if (args == None) or (args.query == None) or (len(args.query.split(',')) == 1 and args.happy == None) or (len(args.query.split(',')) == 2 and len(args.happy.split(',')) == 1):
         parser.print_help()
         sys.exit(1)
     else:
         return args
 
+
+args == None
+query == None
+query ==  1 and happy == None
+query == 2 and happy == 1
 
 def checkHappyQueryMatch():
     happy = args.happy
@@ -48,12 +54,16 @@ def checkHappyQueryMatch():
         assert happy.split('.')[0] == query.split('.')[0].split('-')[0], f'hap.py and query vcf sample names do not match ({happy} & {query})'
     return
 
+
 def checkMetrics(query, metrics):
     '''
     Takes list of metrics and a query VCF. Checks that all metrics requested are available in query VCF. Returns list of useable metrics for plotting.
     '''
     try:
-        requestedMetrics = metrics.split(',')
+        if metrics == 'all':
+            requestedMetrics = 'all'
+        else:
+            requestedMetrics = metrics.split(',')
     except:
         print('\nError parsing metrics. Please check formatting.')
         sys.exit(1)
@@ -70,13 +80,18 @@ def checkMetrics(query, metrics):
     except:
         print('\nError parsing query VCF. Please check format.')
         sys.exit(1)
-    availableInfoMetrics = list(set(requestedMetrics).intersection(allInfoMetrics))
-    availableFormatMetrics = list(set(requestedMetrics).intersection(allFormatMetrics))
-    availableMetrics = [availableInfoMetrics, availableFormatMetrics]
-    if args.verbose:
+    if requestedMetrics == 'all':
+        availableInfoMetrics = allInfoMetrics
+        availableFormatMetrics = allFormatMetrics
+        unavailableMetrics = [[],[]]
+    else:
+        availableInfoMetrics = list(set(requestedMetrics).intersection(allInfoMetrics))
+        availableFormatMetrics = list(set(requestedMetrics).intersection(allFormatMetrics))
         unavailableInfoMetrics = list(set(requestedMetrics).difference(allInfoMetrics))
         unavailableFormatMetrics = list(set(requestedMetrics).difference(allFormatMetrics))
         unavailableMetrics = [unavailableInfoMetrics, unavailableFormatMetrics]
+    availableMetrics = [availableInfoMetrics, availableFormatMetrics]
+    if args.verbose:
         print('\nThe metrics below were requested but not present in the query VCF.\n' + str(unavailableMetrics))
     return availableMetrics
 
@@ -107,8 +122,8 @@ def parseQuery(query):
     except:
         print('\nError parsing query VCF. Please check format.')
         sys.exit(1)
-    
     return variantDict
+
 
 def parseHappy(happy):
     '''
@@ -130,6 +145,7 @@ def parseHappy(happy):
         print('\nError parsing query VCF. Please check format.')
         sys.exit(1)
     return variantDict
+
 
 def createPlot():
     '''
