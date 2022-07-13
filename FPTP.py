@@ -33,13 +33,20 @@ def get_args():
         help='list of metrics to be plotted. The list must be comma-separated with no spaces. By default, all metrics found in the VCF will be plotted.'
     )
     args = parser.parse_args()
-    # exit gracefully if no arguments given (or missing either file or output)
+    # exit gracefully if no arguments given or number of input files is not 2
     if args.query == None or args.output == None:
         parser.print_help()
         sys.exit(1)
     else:
         return args
 
+
+def checkHappyQueryMatch():
+    happy = args.happy
+    query = args.query
+    if happy is not None:
+        assert happy.split('.')[0] == query.split('.')[0].split('-')[0], f'hap.py and query vcf sample names do not match ({happy} & {query})'
+    return
 
 def checkMetrics(query, metrics):
     '''
