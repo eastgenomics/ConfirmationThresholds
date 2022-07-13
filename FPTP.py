@@ -8,7 +8,6 @@ Author: Chris Pyatt
 # import libraries
 import argparse
 import re
-from socket import SOL_NETROM
 
 
 def get_args():
@@ -132,12 +131,17 @@ def createPlot():
     pass
 
 
-def getOutputName():
+def getOutputName(file1,file2,happy):
     '''
-    Parse input filenames and make output filename
+    Parse input filenames and make output filename.
     '''
-    pass
-
+    if happy:
+        sample1 = file1.split('.')[0]
+    else:
+        sample1 = file1.split('.')[0].split('-')[0]
+    sample2 = file2.split('.')[0].split('-')[0]
+    output = f'{sample1}_{sample2}_QCdist.html'
+    return output
 
 def makeReport(plots, outFile):
     '''
