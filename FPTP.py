@@ -11,6 +11,10 @@ import re
 import sys
 
 
+# global variables
+VERBOSE = False
+
+
 def get_args():
     '''
     Parses command line arguments. Returns the arguments as strings.
@@ -34,25 +38,45 @@ def get_args():
         help='list of metrics to be plotted. The list must be comma-separated with no spaces. By default, all metrics found in the VCF will be plotted.'
     )
     args = parser.parse_args()
-    # exit gracefully if no arguments given or number of input files is not 2
-    if (args == None) or (args.query == None) or (len(args.query.split(',')) == 1 and args.happy == None) or (len(args.query.split(',')) == 2 and len(args.happy.split(',')) == 1):
+    # exit gracefully if no arguments given
+    if (args == None) or (args.query == None):
+        parser.print_help()
+        sys.exit(1)
+    # set global verbose variable if needed
+    if args.verbose:
+        VERBOSE = True
+    # convert metrics to list
+    args.metrics = args.metrics.split(',')
+    # convert query to list
+    args.query = args.query.split(',')
+    # exit gracefully if number of input files is incorrect
+    if (len(args.query) == 1 and args.happy == None) or (len(args.query) == 2 and len(args.happy.split(',')) == 1) or (len(args.happy.split(',')) > 1):
         parser.print_help()
         sys.exit(1)
     else:
         return args
 
 
-args == None
-query == None
-query ==  1 and happy == None
-query == 2 and happy == 1
-
-def checkHappyQueryMatch():
-    happy = args.happy
-    query = args.query
+def checkHappyQueryMatch(happy, query):
+    '''
+    Checks that the sample name matches between hap.py VCF and query VCF (as variants will need to be matched between the two to assign TP/FP)
+    '''
     if happy is not None:
         assert happy.split('.')[0] == query.split('.')[0].split('-')[0], f'hap.py and query vcf sample names do not match ({happy} & {query})'
-    return
+    else:
+        return True
+
+
+def checkMultipleQueryMetrics(query, metrics):
+    '''
+    Takes list of (2) query VCFs and a list of metrics. Returns all shared metrics that are on the list.
+    '''
+    availableMetrics1 = checkMetrics(query[0], metrics)
+    availableMetrics2 = checkMetrics(query[1], metrics)
+    availableSharedMetricsInfo = list(set(availableMetrics1[0]).intersection(availableMetrics2[0]))
+    availableSharedMetricsFormat = list(set(availableMetrics1[1]).intersection(availableMetrics2[1]))
+    availableSharedMetrics = [availableSharedMetricsInfo, availableSharedMetricsFormat]
+    return availableSharedMetrics
 
 
 def checkMetrics(query, metrics):
@@ -91,8 +115,8 @@ def checkMetrics(query, metrics):
         unavailableFormatMetrics = list(set(requestedMetrics).difference(allFormatMetrics))
         unavailableMetrics = [unavailableInfoMetrics, unavailableFormatMetrics]
     availableMetrics = [availableInfoMetrics, availableFormatMetrics]
-    if args.verbose:
-        print('\nThe metrics below were requested but not present in the query VCF.\n' + str(unavailableMetrics))
+    if VERBOSE:
+        print(f'\nThe metrics below were requested but not present in the query VCF ({query}).\n' + str(unavailableMetrics))
     return availableMetrics
 
 
@@ -147,24 +171,25 @@ def parseHappy(happy):
     return variantDict
 
 
-def createPlot():
+def createPlot(array1, array2):
     '''
     Given two arrays of metric values, plot corresponding distributions and return plot object.
     '''
     pass
 
 
-def getOutputName(file1,file2,happy):
+def getOutputName(files, happy=True):
     '''
-    Parse input filenames and make output filename.
+    Parse input filenames and make output filename. Takes list of query files (1 or more) and boolean to toggle whether matching happy files are inputs. Returns sample1_sample2_QCdist.html if two sample inputs, otherwise TPvsFP_samplename_QCdist.html for happy inputs.
     '''
     if happy:
-        sample1 = file1.split('.')[0]
+        sample1 = 'TPvsFP'
     else:
-        sample1 = file1.split('.')[0].split('-')[0]
-    sample2 = file2.split('.')[0].split('-')[0]
+        sample1 = files[0].split('.')[0].split('-')[0]
+    sample2 = files[1].split('.')[0].split('-')[0]
     output = f'{sample1}_{sample2}_QCdist.html'
     return output
+
 
 def makeReport(plots, outFile):
     '''
@@ -174,17 +199,58 @@ def makeReport(plots, outFile):
     pass
 
 
+def mergeSamples(sample1, sample2):
+    '''
+    Take two dictionaries, merge them, return merged dictionary.
+    '''
+    mergedDict = sample1 | sample2
+    return mergedDict
+
+
+def makeArrays():
+    '''
+    Take 
+    '''
+    pass
+
+
 def main():
-    # check metrics
+    # get command line arguments
+    args = get_args()
+    if args.happy:
+        # check that sample names match between happy and query files
+        checkHappyQueryMatch(args.happy, args.query[0])
+        # check metrics are available
+        metrics = checkMetrics(args.query[0], args.metrics)
+        # parse inputs
+        sample1 = parseHappy(args.happy)
+        sample2 = parseQuery(args.query[0])
+    else:
+        # check metrics are available
+        metrics = checkMultipleQueryMetrics(args.query, args.metrics)
+        # parse inputs
+        sample1 = parseQuery(args.query[0])
+        sample2 = parseQuery(args.query[1])
 
-    # parse inputs
-
-    # if happy provided, set variable to True, check query length is 1
-    # if no happy, set to False, check query length is 2, parse both
-    # check metrics for each query & merge lists first
+    # list of plot objects to insert into report
+    plots = []
+    for metric in metrics:
+        # list of 4 plots
+        metric_plots = []
+        # plot snps & append to metric_plots
+        # plot indels & append to metric_plots
+        # plot hets & append to metric_plots
+        # plot homs & append to metric_plots
+        plots.append(metric_plots)
+    
+    # for each metric in plots list, add to report ????????
 
     # generate output
-    pass
+    if args.happy:
+        output = getOutputName(args.query)
+    else:
+        output = getOutputName(args.query, False)
+
 
 if __name__ == "__main__":
     main()
