@@ -136,7 +136,11 @@ def parseQuery(query):
                 metricDict = {}
                 for item in vcf_info:
                     name = 'info_' + item.split('=')[0]
-                    value = item.split('=')[1]
+                    # catch flag metrics
+                    try:
+                        value = item.split('=')[1]
+                    except IndexError:
+                        value = True
                     metricDict[name] = value
                 for i in range(len(vcf_format)):
                     name = 'format_' + vcf_format[i]
