@@ -133,24 +133,53 @@ def parseQuery(query):
                     vcf_info = line.split('\t')[7].split(';')
                     vcf_format = line.split('\t')[8].split(':')
                     vcf_genotype = line.split('\t')[9].split(':')
-                metricDict = {}
-                for item in vcf_info:
-                    name = 'info_' + item.split('=')[0]
-                    # catch flag metrics
-                    try:
-                        value = item.split('=')[1]
-                    except IndexError:
-                        value = True
-                    metricDict[name] = value
-                for i in range(len(vcf_format)):
-                    name = 'format_' + vcf_format[i]
-                    value = vcf_genotype[i]
-                    metricDict[name] = value
-                variantDict[variant] = metricDict
+                    metricDict = {}
+                    metricDict['TPFP_or_samplename']
+                    # infer SNP/INDEL status based on ref/alt fields
+                    metricDict['SNP_INDEL'] = inferSnpIndel(variant.split('_')[2], variant.split('_')[3])
+                    # infer het/hom status based on genotype field
+                    metricDict['hethom'] = inferHetHom(vcf_format[0])
+                    for item in vcf_info:
+                        name = 'info_' + item.split('=')[0]
+                        # catch flag metrics
+                        try:
+                            value = item.split('=')[1]
+                        except IndexError:
+                            value = True
+                        metricDict[name] = value
+                    for i in range(len(vcf_format)):
+                        name = 'format_' + vcf_format[i]
+                        value = vcf_genotype[i]
+                        metricDict[name] = value
+                    variantDict[variant] = metricDict
     except:
         print('\nError parsing query VCF. Please check format.')
         sys.exit(1)
     return variantDict
+
+
+def inferHetHom(genotype):
+    '''
+    Take genotype field, return het or homalt label
+    '''
+    if genotype == '0/0':
+        hethom = 'homref'
+    elif genotype == '0/1' or genotype == '1/0':
+        hethom = 'het'
+    elif genotype == '1/1':
+        hethom = 'homalt'
+    else:
+        # not sure whether exiting at this point is best given could be one of thousands - maybe save as N/A and deal with it elsewhere?
+        print(f'Genotype {genotype} not recognised. Het/hom cannot be inferred.')
+        sys.exit()
+
+
+def inferSnpIndel(ref, alt):
+    '''
+    Take ref & alt fields, return SNP or INDEL label
+    '''
+
+    pass
 
 
 def parseHappy(happy):
@@ -166,9 +195,9 @@ def parseHappy(happy):
                 if not line.startswith('#'):
                     variant = line.split('\t')[0] + '_' + line.split('\t')[1] + '_' + line.split('\t')[3] + '_' + line.split('\t')[4]
                     queryInfo = line.split('\t')[10].split(':')
-                    catDict[TPFP] = queryInfo[1]
-                    catDict[SNP_INDEL] = queryInfo[5]
-                    catDict[hethom] = queryInfo[6]
+                    catDict['TPFP_or_samplename'] = queryInfo[1]
+                    catDict['SNP_INDEL'] = queryInfo[5]
+                    catDict['hethom'] = queryInfo[6]
                 variantDict[variant] = catDict
     except:
         print('\nError parsing query VCF. Please check format.')
@@ -210,7 +239,7 @@ def mergeHappyQuery(happy, query):
     '''
     mergedDict = {}
     for variant in happy:
-
+        mergedDict[variant] = {**happy[variant], **query[variant]}
     return mergedDict
 
 
