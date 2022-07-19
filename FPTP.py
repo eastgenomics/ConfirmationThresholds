@@ -13,6 +13,9 @@ import sys
 
 # global variables
 VERBOSE = False
+# names used several times so let's just save them here
+SAMPLE1_NAME = ''
+SAMPLE2_NAME = ''
 
 
 def get_args():
@@ -32,7 +35,7 @@ def get_args():
     )
     parser.add_argument(
         '--query',
-        help='filename of query VCF (containing variants and metric values). Up to two query sample VCFs may be provided, but if a hap.py VCF is provided via the --happy option, only one (matching) query VCF will be accepted.'
+        help='filename of query VCF (containing variants and metric values). Up to two query sample VCFs may be provided, but if a hap.py VCF is provided via the --happy option, only one (matching) query VCF will be accepted. Input data must be normalised VCF.'
     )
     parser.add_argument('--metrics', default='all',
         help='list of metrics to be plotted. The list must be comma-separated with no spaces. By default, all metrics found in the VCF will be plotted.'
@@ -44,6 +47,7 @@ def get_args():
         sys.exit(1)
     # set global verbose variable if needed
     if args.verbose:
+        global VERBOSE
         VERBOSE = True
     # convert metrics to list
     args.metrics = args.metrics.split(',')
@@ -57,12 +61,24 @@ def get_args():
         return args
 
 
+def getSampleNames(sample1, sample2):
+    try:
+        # is declaring as global necessary if declared at top of script?
+        global SAMPLE1_NAME
+        global SAMPLE2_NAME
+        SAMPLE1_NAME = re.split('[.\-]', sample1)
+        SAMPLE2_NAME = re.split('[.\-]', sample2)
+    except:
+        print(f'One of {sample1} or {sample2} does not match the expected pattern. Expected something like samplename-metadata.vcf.gz')
+        sys.exit(1)
+
+
 def checkHappyQueryMatch(happy, query):
     '''
     Checks that the sample name matches between hap.py VCF and query VCF (as variants will need to be matched between the two to assign TP/FP)
     '''
     if happy is not None:
-        assert happy.split('.')[0] == query.split('.')[0].split('-')[0], f'hap.py and query vcf sample names do not match ({happy} & {query})'
+        assert happy == query, f'hap.py and query vcf sample names do not match ({happy} & {query})'
     else:
         return True
 
@@ -134,11 +150,13 @@ def parseQuery(query):
                     vcf_format = line.split('\t')[8].split(':')
                     vcf_genotype = line.split('\t')[9].split(':')
                     metricDict = {}
-                    metricDict['TPFP_or_samplename']
+                    # get samplename
+                    metricDict['TPFP_or_samplename'] = query.split('.')[0].split('-')[0]
                     # infer SNP/INDEL status based on ref/alt fields
                     metricDict['SNP_INDEL'] = inferSnpIndel(variant.split('_')[2], variant.split('_')[3])
                     # infer het/hom status based on genotype field
                     metricDict['hethom'] = inferHetHom(vcf_format[0])
+                    # add info metrics to dictionary
                     for item in vcf_info:
                         name = 'info_' + item.split('=')[0]
                         # catch flag metrics
@@ -147,6 +165,7 @@ def parseQuery(query):
                         except IndexError:
                             value = True
                         metricDict[name] = value
+                    # add format/genotype metrics to dictionary
                     for i in range(len(vcf_format)):
                         name = 'format_' + vcf_format[i]
                         value = vcf_genotype[i]
@@ -171,15 +190,22 @@ def inferHetHom(genotype):
     else:
         # not sure whether exiting at this point is best given could be one of thousands - maybe save as N/A and deal with it elsewhere?
         print(f'Genotype {genotype} not recognised. Het/hom cannot be inferred.')
-        sys.exit()
+        sys.exit(1)
+    return hethom
 
 
 def inferSnpIndel(ref, alt):
     '''
-    Take ref & alt fields, return SNP or INDEL label
+    Take ref & alt fields, return SNP or INDEL label. Input VCF must be normalised for this method to work (i.e. one variant per position).
     '''
-
-    pass
+    if ',' in alt:
+        print(f'Comma present in alt field ({alt}), suggesting non-normalised VCF. Please provide normalised VCF data.')
+        sys.exit(1)
+    elif len(ref) == 1 or len(alt) == 1:
+        SNP_INDEL = 'SNP'
+    else:
+        SNP_INDEL = 'INDEL'
+    return SNP_INDEL
 
 
 def parseHappy(happy):
@@ -243,11 +269,19 @@ def mergeHappyQuery(happy, query):
     return mergedDict
 
 
-def mergeSamples(sample1, sample2, happy=True):
+def mergeSamples(sample1, sample2):
     '''
-    Take two dictionaries, merge them, return merged dictionary.
+    Take two dictionaries, merge them, return merged dictionary. Keys now contain samplename in case samples share variants.
     '''
-    mergedDict = sample1 | sample2
+    mergedDict = {}
+    sample1_name = sample1.split('.')[0].split('-')[0]
+    sample2_name = sample2.split('.')[0].split('-')[0]
+    for variant in sample1:
+        new_key = sample1_name + '-' + variant
+        mergedDict[new_key] = sample1[variant]
+    for variant in sample2:
+        new_key = sample2_name + '-' + variant
+        mergedDict[new_key] = sample2[variant]
     return mergedDict
 
 
@@ -262,8 +296,9 @@ def main():
     # get command line arguments
     args = get_args()
     if args.happy:
+        getSampleNames(args.happy, args.query[0])
         # check that sample names match between happy and query files
-        checkHappyQueryMatch(args.happy, args.query[0])
+        checkHappyQueryMatch(SAMPLE1_NAME, SAMPLE2_NAME)
         # check metrics are available
         metrics = checkMetrics(args.query[0], args.metrics)
         # parse inputs
@@ -272,6 +307,7 @@ def main():
         # merge input dicts
         merged_data = mergeSamples(sample1, sample2)
     else:
+        getSampleNames(args.query[0], args.query[1])
         # check metrics are available
         print("Dual sample inputs not yet implemented\n")
         sys.exit(1)
