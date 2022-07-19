@@ -162,13 +162,14 @@ def parseHappy(happy):
             variantDict = {}
             for line in file:
                 # ignores other info in file e.g. 'CALL_WEIGHT', 'Genotype', 'variant quality for ROC creation', etc.
+                catDict = {}
                 if not line.startswith('#'):
                     variant = line.split('\t')[0] + '_' + line.split('\t')[1] + '_' + line.split('\t')[3] + '_' + line.split('\t')[4]
                     queryInfo = line.split('\t')[10].split(':')
-                    TPFP = queryInfo[1]
-                    SNP_INDEL = queryInfo[5]
-                    hethom = queryInfo[6]
-                variantDict[variant] = [TPFP,SNP_INDEL,hethom]
+                    catDict[TPFP] = queryInfo[1]
+                    catDict[SNP_INDEL] = queryInfo[5]
+                    catDict[hethom] = queryInfo[6]
+                variantDict[variant] = catDict
     except:
         print('\nError parsing query VCF. Please check format.')
         sys.exit(1)
@@ -203,7 +204,17 @@ def makeReport(plots, outFile):
     pass
 
 
-def mergeSamples(sample1, sample2):
+def mergeHappyQuery(happy, query):
+    '''
+    Take happy dict (output of parseHappy) and query dict (output of parseQuery) & return new dictionary with matched variants and merged values
+    '''
+    mergedDict = {}
+    for variant in happy:
+
+    return mergedDict
+
+
+def mergeSamples(sample1, sample2, happy=True):
     '''
     Take two dictionaries, merge them, return merged dictionary.
     '''
@@ -211,7 +222,7 @@ def mergeSamples(sample1, sample2):
     return mergedDict
 
 
-def makeArrays():
+def makeArrays(data, category):
     '''
     Take 
     '''
@@ -229,12 +240,19 @@ def main():
         # parse inputs
         sample1 = parseHappy(args.happy)
         sample2 = parseQuery(args.query[0])
+        # merge input dicts
+        merged_data = mergeSamples(sample1, sample2)
     else:
         # check metrics are available
+        print("Dual sample inputs not yet implemented\n")
+        sys.exit(1)
         metrics = checkMultipleQueryMetrics(args.query, args.metrics)
         # parse inputs
         sample1 = parseQuery(args.query[0])
         sample2 = parseQuery(args.query[1])
+        # merge input dicts
+        merged_data = mergeSamples(sample1, sample2, False)
+
 
     # list of plot objects to insert into report
     plots = []
