@@ -86,14 +86,6 @@ def checkHappyQueryMatch(happy, query):
         return True
 
 
-def checkHappyQueryMatchVariants(happy, query):
-    '''
-    Take happy and query dicts from parsing functions - check that variants are the same (should be as should be same GIAB sample), return true or raises error & exits
-    '''
-    assert happy.keys() == query.keys(), f'variants are not the same in the two input files. The hap.py and query VCFs should originate from the same sample.'
-    return True
-
-
 def checkMultipleQueryMetrics(query, metrics):
     '''
     Takes list of (2) query VCFs and a list of metrics. Returns all shared metrics that are on the list.
@@ -279,8 +271,14 @@ def mergeHappyQuery(happy, query):
     Take happy dict (output of parseHappy) and query dict (output of parseQuery) & return new dictionary with matched variants and merged values
     '''
     mergedDict = {}
+    missingVariants = []
     for variant in happy:
-        mergedDict[variant] = {**happy[variant], **query[variant]}
+        try:
+            mergedDict[variant] = {**happy[variant], **query[variant]}
+        except KeyError:
+            missingVariants.append(variant)
+    if VERBOSE:
+        print(f'\nThe variants below were present in the hap.py VCF ({happy}) but not the query VCF ({query}).\n' + str(missingVariants))
     return mergedDict
 
 
@@ -349,8 +347,6 @@ def main():
         # parse inputs
         sample1 = parseHappy(args.happy)
         sample2 = parseQuery(args.query[0])
-        # check variants match
-        checkHappyQueryMatchVariants(sample1, sample2)
         # merge input dicts
         merged_data = mergeHappyQuery(sample1, sample2)
         # make 4 arrays for snp, indel, het, hom plots
