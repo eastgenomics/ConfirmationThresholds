@@ -155,7 +155,7 @@ def parseQuery(query):
                     # infer SNP/INDEL status based on ref/alt fields
                     metricDict['SNP_INDEL'] = inferSnpIndel(variant.split('_')[2], variant.split('_')[3])
                     # infer het/hom status based on genotype field
-                    metricDict['hethom'] = inferHetHom(vcf_format[0])
+                    metricDict['HETHOM'] = inferHetHom(vcf_format[0])
                     # add info metrics to dictionary
                     for item in vcf_info:
                         name = 'info_' + item.split('=')[0]
@@ -223,7 +223,7 @@ def parseHappy(happy):
                     queryInfo = line.split('\t')[10].split(':')
                     catDict['TPFP_or_samplename'] = queryInfo[1]
                     catDict['SNP_INDEL'] = queryInfo[5]
-                    catDict['hethom'] = queryInfo[6]
+                    catDict['HETHOM'] = queryInfo[6]
                 variantDict[variant] = catDict
     except:
         print('\nError parsing query VCF. Please check format.')
@@ -285,11 +285,36 @@ def mergeSamples(sample1, sample2):
     return mergedDict
 
 
-def makeArrays(data, category):
+def makeArrays(data, metric, fptp, snp_indel=None, hethom=None):
     '''
-    Take 
+    Take merged dictionary, return two arrays (happy vs query, or sample1 vs sample2) of relevant metric values for plotting, split according to category (SNP/INDEL, het/hom).
     '''
-    pass
+    array1 = []
+    array2 = []
+    if snp_indel:
+        filtered_keys_1 = [k for k,v in data.items() if v['FPTP'] == fptp[0] and v['SNP_INDEL'] == snp_indel]
+        filtered_keys_2 = [k for k,v in data.items() if v['FPTP'] == fptp[1] and v['SNP_INDEL'] == snp_indel]
+    if hethom:
+        filtered_keys_1 = [k for k,v in data.items() if v['FPTP'] == fptp[0] and v['HETHOM'] == hethom]
+        filtered_keys_2 = [k for k,v in data.items() if v['FPTP'] == fptp[1] and v['HETHOM'] == hethom]
+    else:
+        filtered_keys_1 = [k for k,v in data.items() if v['FPTP'] == fptp[0]]
+        filtered_keys_2 = [k for k,v in data.items() if v['FPTP'] == fptp[1]]
+    for item in filtered_keys_1:
+        array1.append(item[metric])
+    for item in filtered_keys_2:
+        array2.append(item[metric])
+    return [array1, array2]
+
+
+def makeArrayList(data, metrics, happy=True):
+    arrayList = []
+    if happy:
+        fptp = ['TP', 'FP']
+    else:
+        fptp = [SAMPLE1_NAME, SAMPLE2_NAME]
+    for metric in metrics:
+        snp_arrays = makeArrays(data, metric, fptp, 'SNP', )
 
 
 def main():
@@ -324,6 +349,7 @@ def main():
     for metric in metrics:
         # list of 4 plots
         metric_plots = []
+        makeArrays(merged_data, metric, 'FP', 'SNP', 'het')
         # plot snps & append to metric_plots
         # plot indels & append to metric_plots
         # plot hets & append to metric_plots
