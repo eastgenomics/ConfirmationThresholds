@@ -308,13 +308,16 @@ def makeArrays(data, metric, fptp, snp_indel=None, hethom=None):
 
 
 def makeArrayList(data, metrics, happy=True):
-    arrayList = []
     if happy:
         fptp = ['TP', 'FP']
     else:
         fptp = [SAMPLE1_NAME, SAMPLE2_NAME]
     for metric in metrics:
-        snp_arrays = makeArrays(data, metric, fptp, 'SNP', )
+        snp_arrays = makeArrays(data, metric, fptp, snp_indel='SNP')
+        indel_arrays = makeArrays(data, metric, fptp, snp_indel='INDEL')
+        het_arrays = makeArrays(data, metric, fptp, hethom='het')
+        hom_arrays = makeArrays(data, metric, fptp, hethom='homalt')
+    return [snp_arrays, indel_arrays, het_arrays, hom_arrays]
 
 
 def main():
