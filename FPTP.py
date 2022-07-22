@@ -278,7 +278,7 @@ def mergeHappyQuery(happy, query):
         except KeyError:
             missingVariants.append(variant)
     if VERBOSE:
-        print(f'\nThe variants below were present in the hap.py VCF ({happy}) but not the query VCF ({query}).\n' + str(missingVariants))
+        print(f'\nThe variants below were present in the hap.py VCF but not the query VCF.\n' + str(missingVariants))
     return mergedDict
 
 
@@ -300,7 +300,6 @@ def makeArrays(data, metric, fptp, snp_indel=None, hethom=None):
     '''
     Take merged dictionary, return two arrays (happy vs query, or sample1 vs sample2) of relevant metric values for plotting, split according to category (SNP/INDEL, het/hom).
     '''
-    print(data)
     array1 = [fptp[0]]
     array2 = [fptp[1]]
     if snp_indel:
@@ -312,10 +311,7 @@ def makeArrays(data, metric, fptp, snp_indel=None, hethom=None):
     else:
         filtered_keys_1 = [k for k,v in data.items() if v['TPFP_or_samplename'] == fptp[0]]
         filtered_keys_2 = [k for k,v in data.items() if v['TPFP_or_samplename'] == fptp[1]]
-    print(filtered_keys_1)
     for item in filtered_keys_1:
-        print(item)
-        print(data[item])
         array1.append(data[item][metric])
     for item in filtered_keys_2:
         array2.append(item[metric])
@@ -371,7 +367,6 @@ def main():
     for metric in metrics:
         # list of 4 plots
         metric_plots = []
-        makeArrays(merged_data, metric, 'FP', 'SNP', 'het')
         # plot snps & append to metric_plots
         # plot indels & append to metric_plots
         # plot hets & append to metric_plots
@@ -382,7 +377,7 @@ def main():
 
     # generate output
     if args.happy:
-        output = getOutputName(args.query)
+        output = getOutputName([args.happy, args.query[0]])
     else:
         output = getOutputName(args.query, False)
 
