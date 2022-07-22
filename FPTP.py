@@ -10,8 +10,9 @@ import argparse
 import re
 import sys
 import pandas as pd
-import plotly
+import plotly.figure_factory as ff
 import gzip
+import scipy
 
 
 # global variables
@@ -116,10 +117,12 @@ def checkMetrics(query, metrics):
             allFormatMetrics = []
             # parse out metric names - separate info and format metrics in case of identical names (usually DP)
             for line in file:
-                if line.startswith('##INFO'):
+                if line.startswith('##INFO') and ('Integer' in line.split(',')[2] or 'Float' in line.split(',')[2]):
                     allInfoMetrics.append(line.split(',')[0].split('=')[-1])
-                elif line.startswith('##FORMAT'):
+                elif line.startswith('##FORMAT') and ('Integer' in line.split(',')[2] or 'Float' in line.split(',')[2]):
                     allFormatMetrics.append(line.split(',')[0].split('=')[-1]) # add stop after header to prevent parsing whole file here
+                elif line.startswith('#CHROM'):
+                    break
     except:
         print('\nError retreiving query VCF metrics. Please check format.')
         sys.exit(1)
@@ -139,7 +142,7 @@ def checkMetrics(query, metrics):
     return availableMetrics
 
 
-def parseQuery(query):
+def parseQuery(query, happy=True):
     '''
     Takes a query vcf filename. Returns a dictionary of relevant metrics and values, paired to variants.
     '''
@@ -151,14 +154,15 @@ def parseQuery(query):
                     variant = line.split('\t')[0] + '_' + line.split('\t')[1] + '_' + line.split('\t')[3] + '_' + line.split('\t')[4]
                     vcf_info = line.split('\t')[7].split(';')
                     vcf_format = line.split('\t')[8].split(':')
-                    vcf_genotype = line.split('\t')[9].split(':')
+                    vcf_genotype = line.rstrip().split('\t')[9].split(':')
                     metricDict = {}
-                    # get samplename
-                    metricDict['TPFP_or_samplename'] = query.split('.')[0].split('-')[0]
-                    # infer SNP/INDEL status based on ref/alt fields
-                    metricDict['SNP_INDEL'] = inferSnpIndel(variant.split('_')[2], variant.split('_')[3])
-                    # infer het/hom status based on genotype field
-                    metricDict['HETHOM'] = inferHetHom(vcf_genotype[0])
+                    if not happy:
+                        # get samplename
+                        metricDict['TPFP_or_samplename'] = query.split('.')[0].split('-')[0]
+                        # infer SNP/INDEL status based on ref/alt fields
+                        metricDict['SNP_INDEL'] = inferSnpIndel(variant.split('_')[2], variant.split('_')[3])
+                        # infer het/hom status based on genotype field
+                        metricDict['HETHOM'] = inferHetHom(vcf_genotype[0])
                     # add info metrics to dictionary
                     for item in vcf_info:
                         name = 'info_' + item.split('=')[0]
@@ -236,13 +240,14 @@ def parseHappy(happy):
     return variantDict
 
 
-def createPlot(array1, array2):
+def createPlot(array1, array2, name):
     '''
     Given two arrays of metric values, plot corresponding distributions and return plot object.
     '''
+    print(array1)
     labels = [array1.pop(0), array2.pop(0)]
-    fig = ff.create_distplot(variables, labels, show_hist=False)
-    pass
+    fig = ff.create_distplot([array1, array2], labels, show_hist=False)
+    return fig
 
 
 def getOutputName(files, happy=True):
@@ -300,11 +305,13 @@ def makeArrays(data, metric, fptp, snp_indel=None, hethom=None):
     '''
     Take merged dictionary, return two arrays (happy vs query, or sample1 vs sample2) of relevant metric values for plotting, split according to category (SNP/INDEL, het/hom).
     '''
+    print(data)
     array1 = [fptp[0]]
     array2 = [fptp[1]]
     if snp_indel:
         filtered_keys_1 = [k for k,v in data.items() if v['TPFP_or_samplename'] == fptp[0] and v['SNP_INDEL'] == snp_indel]
         filtered_keys_2 = [k for k,v in data.items() if v['TPFP_or_samplename'] == fptp[1] and v['SNP_INDEL'] == snp_indel]
+        print(filtered_keys_1)
     if hethom:
         filtered_keys_1 = [k for k,v in data.items() if v['TPFP_or_samplename'] == fptp[0] and v['HETHOM'] == hethom]
         filtered_keys_2 = [k for k,v in data.items() if v['TPFP_or_samplename'] == fptp[1] and v['HETHOM'] == hethom]
@@ -314,21 +321,34 @@ def makeArrays(data, metric, fptp, snp_indel=None, hethom=None):
     for item in filtered_keys_1:
         array1.append(data[item][metric])
     for item in filtered_keys_2:
-        array2.append(item[metric])
+        array2.append(data[item][metric])
+    print(array1, array2)
     return [array1, array2]
 
 
-def makeArrayList(data, metrics, happy=True):
+def makePlots(data, metrics, happy=True):
+    '''
+    Take merged data and list of metrics. Return dictionary of plot objects (keys = metrics).
+    '''
+    plot_dict = {}
     if happy:
         fptp = ['TP', 'FP']
     else:
         fptp = [SAMPLE1_NAME, SAMPLE2_NAME]
     for metric in metrics:
+        # make filtered arrays for each variant category
         snp_arrays = makeArrays(data, metric, fptp, snp_indel='SNP')
         indel_arrays = makeArrays(data, metric, fptp, snp_indel='INDEL')
         het_arrays = makeArrays(data, metric, fptp, hethom='het')
         hom_arrays = makeArrays(data, metric, fptp, hethom='homalt')
-    return [snp_arrays, indel_arrays, het_arrays, hom_arrays]
+        # make plots for each category
+        snp_plot = createPlot(snp_arrays[0], snp_arrays[1], 'SNP')
+        indel_plot = createPlot(indel_arrays[0], indel_arrays[1], 'INDEL')
+        het_plot = createPlot(het_arrays[0], het_arrays[1], 'HET')
+        hom_plot = createPlot(hom_arrays[0], hom_arrays[1], 'HOM')
+        # add to dictionary, group by metric
+        plot_dict[metric] = {'snp':snp_plot, 'indel':indel_plot, 'het':het_plot, 'hom':hom_plot}
+    return plot_dict
 
 
 def main():
@@ -345,8 +365,8 @@ def main():
         sample2 = parseQuery(args.query[0])
         # merge input dicts
         merged_data = mergeHappyQuery(sample1, sample2)
-        # make 4 arrays for snp, indel, het, hom plots
-        arrays = makeArrayList(merged_data, metrics)
+        # make 4 arrays for snp, indel, het, hom plots, for each metric
+        arrays = makePlots(merged_data, metrics)
     else:
         getSampleNames(args.query[0], args.query[1])
         # check metrics are available
@@ -354,27 +374,17 @@ def main():
         sys.exit(1)
         metrics = checkMultipleQueryMetrics(args.query, args.metrics)
         # parse inputs
-        sample1 = parseQuery(args.query[0])
-        sample2 = parseQuery(args.query[1])
+        sample1 = parseQuery(args.query[0], False)
+        sample2 = parseQuery(args.query[1], False)
         # merge input dicts
         merged_data = mergeSamples(sample1, sample2, False)
         # make 4 arrays for snp, indel, het, hom plots
-        arrays = makeArrayList(merged_data, metrics, happy=False)
-
-
-    # list of plot objects to insert into report
-    plots = []
-    for metric in metrics:
-        # list of 4 plots
-        metric_plots = []
-        # plot snps & append to metric_plots
-        # plot indels & append to metric_plots
-        # plot hets & append to metric_plots
-        # plot homs & append to metric_plots
-        plots.append(metric_plots)
+        arrays = makePlots(merged_data, metrics, happy=False)
     
+    # make plots for each metric from list of arrays
+    plots = makePlots(arrays)
     # for each metric in plots list, add to report ????????
-
+    makeReport()
     # generate output
     if args.happy:
         output = getOutputName([args.happy, args.query[0]])
