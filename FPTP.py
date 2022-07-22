@@ -9,6 +9,9 @@ Author: Chris Pyatt
 import argparse
 import re
 import sys
+import pandas as pd
+import plotly
+import gzip
 
 
 # global variables
@@ -27,7 +30,7 @@ def get_args():
     )
     parser.add_argument(
         '--happy',
-        help='filename of hap.py VCF (containing variants and TP/FP calls).'
+        help='filename of hap.py VCF (containing variants and TP/FP calls). Gzipped.'
     )
     parser.add_argument(
         '--verbose',action='store_true',
@@ -35,7 +38,7 @@ def get_args():
     )
     parser.add_argument(
         '--query',
-        help='filename of query VCF (containing variants and metric values). Up to two query sample VCFs may be provided, but if a hap.py VCF is provided via the --happy option, only one (matching) query VCF will be accepted. Input data must be normalised VCF.'
+        help='filename of query VCF (containing variants and metric values). Gzipped. Up to two query sample VCFs may be provided, but if a hap.py VCF is provided via the --happy option, only one (matching) query VCF will be accepted. Input data must be normalised VCF.'
     )
     parser.add_argument('--metrics', default='all',
         help='list of metrics to be plotted. The list must be comma-separated with no spaces. By default, all metrics found in the VCF will be plotted.'
@@ -50,7 +53,7 @@ def get_args():
         global VERBOSE
         VERBOSE = True
     # convert metrics to list
-    args.metrics = args.metrics.split(',')
+    #args.metrics = args.metrics.split(',')
     # convert query to list
     args.query = args.query.split(',')
     # exit gracefully if number of input files is incorrect
@@ -66,8 +69,8 @@ def getSampleNames(sample1, sample2):
         # is declaring as global necessary if declared at top of script?
         global SAMPLE1_NAME
         global SAMPLE2_NAME
-        SAMPLE1_NAME = re.split('[.\-]', sample1)
-        SAMPLE2_NAME = re.split('[.\-]', sample2)
+        SAMPLE1_NAME = re.split('[.\-]', sample1)[0]
+        SAMPLE2_NAME = re.split('[.\-]', sample2)[0]
     except:
         print(f'One of {sample1} or {sample2} does not match the expected pattern. Expected something like samplename-metadata.vcf.gz')
         sys.exit(1)
@@ -77,10 +80,18 @@ def checkHappyQueryMatch(happy, query):
     '''
     Checks that the sample name matches between hap.py VCF and query VCF (as variants will need to be matched between the two to assign TP/FP)
     '''
-    if happy is not None:
+    if happy:
         assert happy == query, f'hap.py and query vcf sample names do not match ({happy} & {query})'
     else:
         return True
+
+
+def checkHappyQueryMatchVariants(happy, query):
+    '''
+    Take happy and query dicts from parsing functions - check that variants are the same (should be as should be same GIAB sample), return true or raises error & exits
+    '''
+    assert happy.keys() == query.keys(), f'variants are not the same in the two input files. The hap.py and query VCFs should originate from the same sample.'
+    return True
 
 
 def checkMultipleQueryMetrics(query, metrics):
@@ -108,7 +119,7 @@ def checkMetrics(query, metrics):
         print('\nError parsing metrics. Please check formatting.')
         sys.exit(1)
     try:
-        with open(query) as file:
+        with gzip.open(query, 'rt') as file:
             allInfoMetrics = []
             allFormatMetrics = []
             # parse out metric names - separate info and format metrics in case of identical names (usually DP)
@@ -116,9 +127,9 @@ def checkMetrics(query, metrics):
                 if line.startswith('##INFO'):
                     allInfoMetrics.append(line.split(',')[0].split('=')[-1])
                 elif line.startswith('##FORMAT'):
-                    allFormatMetrics.append(line.split(',')[0].split('=')[-1])
+                    allFormatMetrics.append(line.split(',')[0].split('=')[-1]) # add stop after header to prevent parsing whole file here
     except:
-        print('\nError parsing query VCF. Please check format.')
+        print('\nError retreiving query VCF metrics. Please check format.')
         sys.exit(1)
     if requestedMetrics == 'all':
         availableInfoMetrics = allInfoMetrics
@@ -141,7 +152,7 @@ def parseQuery(query):
     Takes a query vcf filename. Returns a dictionary of relevant metrics and values, paired to variants.
     '''
     try:
-        with open(query) as file:
+        with gzip.open(query, 'rt') as file:
             variantDict = {}
             for line in file:
                 if not line.startswith('#'):
@@ -155,7 +166,7 @@ def parseQuery(query):
                     # infer SNP/INDEL status based on ref/alt fields
                     metricDict['SNP_INDEL'] = inferSnpIndel(variant.split('_')[2], variant.split('_')[3])
                     # infer het/hom status based on genotype field
-                    metricDict['HETHOM'] = inferHetHom(vcf_format[0])
+                    metricDict['HETHOM'] = inferHetHom(vcf_genotype[0])
                     # add info metrics to dictionary
                     for item in vcf_info:
                         name = 'info_' + item.split('=')[0]
@@ -213,7 +224,7 @@ def parseHappy(happy):
     Takes a Hap.py output vcf containing TP & FP calls. Returns a dictionary of variants paired with TP/FP, SNP/INDEL, & het/hom status.
     '''
     try:
-        with open(happy) as file:
+        with gzip.open(happy, 'rt') as file:
             variantDict = {}
             for line in file:
                 # ignores other info in file e.g. 'CALL_WEIGHT', 'Genotype', 'variant quality for ROC creation', etc.
@@ -223,10 +234,12 @@ def parseHappy(happy):
                     queryInfo = line.split('\t')[10].split(':')
                     catDict['TPFP_or_samplename'] = queryInfo[1]
                     catDict['SNP_INDEL'] = queryInfo[5]
-                    catDict['HETHOM'] = queryInfo[6]
+                    catDict['HETHOM'] = queryInfo[6].rstrip()
+                else:
+                    continue
                 variantDict[variant] = catDict
     except:
-        print('\nError parsing query VCF. Please check format.')
+        print('\nError parsing happy VCF. Please check format.')
         sys.exit(1)
     return variantDict
 
@@ -235,6 +248,8 @@ def createPlot(array1, array2):
     '''
     Given two arrays of metric values, plot corresponding distributions and return plot object.
     '''
+    labels = [array1.pop(0), array2.pop(0)]
+    fig = ff.create_distplot(variables, labels, show_hist=False)
     pass
 
 
@@ -274,13 +289,11 @@ def mergeSamples(sample1, sample2):
     Take two dictionaries, merge them, return merged dictionary. Keys now contain samplename in case samples share variants.
     '''
     mergedDict = {}
-    sample1_name = sample1.split('.')[0].split('-')[0]
-    sample2_name = sample2.split('.')[0].split('-')[0]
     for variant in sample1:
-        new_key = sample1_name + '-' + variant
+        new_key = SAMPLE1_NAME + '-' + variant
         mergedDict[new_key] = sample1[variant]
     for variant in sample2:
-        new_key = sample2_name + '-' + variant
+        new_key = SAMPLE2_NAME + '-' + variant
         mergedDict[new_key] = sample2[variant]
     return mergedDict
 
@@ -289,19 +302,23 @@ def makeArrays(data, metric, fptp, snp_indel=None, hethom=None):
     '''
     Take merged dictionary, return two arrays (happy vs query, or sample1 vs sample2) of relevant metric values for plotting, split according to category (SNP/INDEL, het/hom).
     '''
-    array1 = []
-    array2 = []
+    print(data)
+    array1 = [fptp[0]]
+    array2 = [fptp[1]]
     if snp_indel:
-        filtered_keys_1 = [k for k,v in data.items() if v['FPTP'] == fptp[0] and v['SNP_INDEL'] == snp_indel]
-        filtered_keys_2 = [k for k,v in data.items() if v['FPTP'] == fptp[1] and v['SNP_INDEL'] == snp_indel]
+        filtered_keys_1 = [k for k,v in data.items() if v['TPFP_or_samplename'] == fptp[0] and v['SNP_INDEL'] == snp_indel]
+        filtered_keys_2 = [k for k,v in data.items() if v['TPFP_or_samplename'] == fptp[1] and v['SNP_INDEL'] == snp_indel]
     if hethom:
-        filtered_keys_1 = [k for k,v in data.items() if v['FPTP'] == fptp[0] and v['HETHOM'] == hethom]
-        filtered_keys_2 = [k for k,v in data.items() if v['FPTP'] == fptp[1] and v['HETHOM'] == hethom]
+        filtered_keys_1 = [k for k,v in data.items() if v['TPFP_or_samplename'] == fptp[0] and v['HETHOM'] == hethom]
+        filtered_keys_2 = [k for k,v in data.items() if v['TPFP_or_samplename'] == fptp[1] and v['HETHOM'] == hethom]
     else:
-        filtered_keys_1 = [k for k,v in data.items() if v['FPTP'] == fptp[0]]
-        filtered_keys_2 = [k for k,v in data.items() if v['FPTP'] == fptp[1]]
+        filtered_keys_1 = [k for k,v in data.items() if v['TPFP_or_samplename'] == fptp[0]]
+        filtered_keys_2 = [k for k,v in data.items() if v['TPFP_or_samplename'] == fptp[1]]
+    print(filtered_keys_1)
     for item in filtered_keys_1:
-        array1.append(item[metric])
+        print(item)
+        print(data[item])
+        array1.append(data[item][metric])
     for item in filtered_keys_2:
         array2.append(item[metric])
     return [array1, array2]
@@ -332,8 +349,12 @@ def main():
         # parse inputs
         sample1 = parseHappy(args.happy)
         sample2 = parseQuery(args.query[0])
+        # check variants match
+        checkHappyQueryMatchVariants(sample1, sample2)
         # merge input dicts
-        merged_data = mergeSamples(sample1, sample2)
+        merged_data = mergeHappyQuery(sample1, sample2)
+        # make 4 arrays for snp, indel, het, hom plots
+        arrays = makeArrayList(merged_data, metrics)
     else:
         getSampleNames(args.query[0], args.query[1])
         # check metrics are available
@@ -345,6 +366,8 @@ def main():
         sample2 = parseQuery(args.query[1])
         # merge input dicts
         merged_data = mergeSamples(sample1, sample2, False)
+        # make 4 arrays for snp, indel, het, hom plots
+        arrays = makeArrayList(merged_data, metrics, happy=False)
 
 
     # list of plot objects to insert into report
