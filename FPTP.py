@@ -120,7 +120,7 @@ def checkMetrics(query, metrics):
                 if line.startswith('##INFO') and ('Integer' in line.split(',')[2] or 'Float' in line.split(',')[2]):
                     allInfoMetrics.append(line.split(',')[0].split('=')[-1])
                 elif line.startswith('##FORMAT') and ('Integer' in line.split(',')[2] or 'Float' in line.split(',')[2]):
-                    allFormatMetrics.append(line.split(',')[0].split('=')[-1]) # add stop after header to prevent parsing whole file here
+                    allFormatMetrics.append(line.split(',')[0].split('=')[-1])
                 elif line.startswith('#CHROM'):
                     break
     except:
@@ -136,7 +136,12 @@ def checkMetrics(query, metrics):
         unavailableInfoMetrics = list(set(requestedMetrics).difference(allInfoMetrics))
         unavailableFormatMetrics = list(set(requestedMetrics).difference(allFormatMetrics))
         unavailableMetrics = [unavailableInfoMetrics, unavailableFormatMetrics]
-    availableMetrics = [availableInfoMetrics, availableFormatMetrics]
+    # add prefixes to metrics list to distinguish duplicate metric names in INFO and FORMAT fields
+    availableMetrics = []
+    for metric in availableInfoMetrics:
+        availableMetrics.append(f'info_{metric}')
+    for metric in availableFormatMetrics:
+        availableMetrics.append(f'format_{metric}')
     if VERBOSE:
         print(f'\nThe metrics below were requested but not present in the query VCF ({query}).\n' + str(unavailableMetrics))
     return availableMetrics
@@ -244,8 +249,11 @@ def createPlot(array1, array2, name):
     '''
     Given two arrays of metric values, plot corresponding distributions and return plot object.
     '''
-    print(array1)
+    print('Plot arrays for: ', array1, array2)
     labels = [array1.pop(0), array2.pop(0)]
+    if len(array1) < 1 or len(array2) < 1:
+        # do something to indicate insufficient data for this metric combo??
+        return 1
     fig = ff.create_distplot([array1, array2], labels, show_hist=False)
     return fig
 
@@ -305,13 +313,11 @@ def makeArrays(data, metric, fptp, snp_indel=None, hethom=None):
     '''
     Take merged dictionary, return two arrays (happy vs query, or sample1 vs sample2) of relevant metric values for plotting, split according to category (SNP/INDEL, het/hom).
     '''
-    print(data)
     array1 = [fptp[0]]
     array2 = [fptp[1]]
     if snp_indel:
         filtered_keys_1 = [k for k,v in data.items() if v['TPFP_or_samplename'] == fptp[0] and v['SNP_INDEL'] == snp_indel]
         filtered_keys_2 = [k for k,v in data.items() if v['TPFP_or_samplename'] == fptp[1] and v['SNP_INDEL'] == snp_indel]
-        print(filtered_keys_1)
     if hethom:
         filtered_keys_1 = [k for k,v in data.items() if v['TPFP_or_samplename'] == fptp[0] and v['HETHOM'] == hethom]
         filtered_keys_2 = [k for k,v in data.items() if v['TPFP_or_samplename'] == fptp[1] and v['HETHOM'] == hethom]
@@ -319,10 +325,9 @@ def makeArrays(data, metric, fptp, snp_indel=None, hethom=None):
         filtered_keys_1 = [k for k,v in data.items() if v['TPFP_or_samplename'] == fptp[0]]
         filtered_keys_2 = [k for k,v in data.items() if v['TPFP_or_samplename'] == fptp[1]]
     for item in filtered_keys_1:
-        array1.append(data[item][metric])
+        array1.append(float(data[item][metric]))
     for item in filtered_keys_2:
-        array2.append(data[item][metric])
-    print(array1, array2)
+        array2.append(float(data[item][metric]))
     return [array1, array2]
 
 
@@ -336,6 +341,7 @@ def makePlots(data, metrics, happy=True):
     else:
         fptp = [SAMPLE1_NAME, SAMPLE2_NAME]
     for metric in metrics:
+        print(metric)
         # make filtered arrays for each variant category
         snp_arrays = makeArrays(data, metric, fptp, snp_indel='SNP')
         indel_arrays = makeArrays(data, metric, fptp, snp_indel='INDEL')
