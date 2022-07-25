@@ -7,12 +7,17 @@ Author: Chris Pyatt
 
 # import libraries
 import argparse
+from operator import mod
 import re
 import sys
 import pandas as pd
+import numpy as np
+#import plotly.plotly as py
 import plotly.figure_factory as ff
+import plotly.graph_objects as go
 import gzip
-import scipy
+from numpy.linalg import inv, det
+from IPython.display import HTML
 
 
 # global variables
@@ -117,9 +122,10 @@ def checkMetrics(query, metrics):
             allFormatMetrics = []
             # parse out metric names - separate info and format metrics in case of identical names (usually DP)
             for line in file:
-                if line.startswith('##INFO') and ('Integer' in line.split(',')[2] or 'Float' in line.split(',')[2]):
+                # grab only metrics where the type is float or integer (as others cannot be plotted) and also where the number of values is constrained to 1. The latter constraint will be modified to accept lists of values in later versions of this tool.
+                if line.startswith('##INFO') and ('Integer' in line.split(',')[2] or 'Float' in line.split(',')[2]) and line.split(',')[1] == 'Number=1':
                     allInfoMetrics.append(line.split(',')[0].split('=')[-1])
-                elif line.startswith('##FORMAT') and ('Integer' in line.split(',')[2] or 'Float' in line.split(',')[2]):
+                elif line.startswith('##FORMAT') and ('Integer' in line.split(',')[2] or 'Float' in line.split(',')[2]) and line.split(',')[1] == 'Number=1':
                     allFormatMetrics.append(line.split(',')[0].split('=')[-1])
                 elif line.startswith('#CHROM'):
                     break
@@ -249,12 +255,14 @@ def createPlot(array1, array2, name):
     '''
     Given two arrays of metric values, plot corresponding distributions and return plot object.
     '''
-    print('Plot arrays for: ', array1, array2)
     labels = [array1.pop(0), array2.pop(0)]
     if len(array1) < 1 or len(array2) < 1:
         # do something to indicate insufficient data for this metric combo??
         return 1
-    fig = ff.create_distplot([array1, array2], labels, show_hist=False)
+    # convert arrays to dataframe with column headers
+    df = pd.DataFrame({labels[0]: np.random.randn(200), labels[1]: np.random.randn(200)+1})
+    # make distribution plot object
+    fig = ff.create_distplot([df[c] for c in df.columns], df.columns, bin_size=.25)
     return fig
 
 
@@ -277,6 +285,10 @@ def makeReport(plots, outFile):
     Output name constructed from input filenames.
     '''
     pass
+    #for plot_obj in plots:
+    #    plot_url = py.plot(plot_obj, filename='plot_object', auto_open=False,)
+    #    print(plot_url)
+    #return
 
 
 def mergeHappyQuery(happy, query):
@@ -325,9 +337,16 @@ def makeArrays(data, metric, fptp, snp_indel=None, hethom=None):
         filtered_keys_1 = [k for k,v in data.items() if v['TPFP_or_samplename'] == fptp[0]]
         filtered_keys_2 = [k for k,v in data.items() if v['TPFP_or_samplename'] == fptp[1]]
     for item in filtered_keys_1:
-        array1.append(float(data[item][metric]))
+        # try to append metric value to array but catch occurrences where metric is not present for that variant (usually metrics like BaseQRankSum, ClippingRankSum, ExcessHet, etc.)
+        try:
+            array1.append(float(data[item][metric]))
+        except KeyError:
+            pass
     for item in filtered_keys_2:
-        array2.append(float(data[item][metric]))
+        try:
+            array2.append(float(data[item][metric]))
+        except KeyError:
+            pass
     return [array1, array2]
 
 
@@ -336,6 +355,7 @@ def makePlots(data, metrics, happy=True):
     Take merged data and list of metrics. Return dictionary of plot objects (keys = metrics).
     '''
     plot_dict = {}
+    plot_list = []
     if happy:
         fptp = ['TP', 'FP']
     else:
@@ -352,9 +372,50 @@ def makePlots(data, metrics, happy=True):
         indel_plot = createPlot(indel_arrays[0], indel_arrays[1], 'INDEL')
         het_plot = createPlot(het_arrays[0], het_arrays[1], 'HET')
         hom_plot = createPlot(hom_arrays[0], hom_arrays[1], 'HOM')
+        # 
+        fig = makeTiledFigure([snp_plot,indel_plot,het_plot,hom_plot])
+        plot_list.append(fig)
         # add to dictionary, group by metric
         plot_dict[metric] = {'snp':snp_plot, 'indel':indel_plot, 'het':het_plot, 'hom':hom_plot}
-    return plot_dict
+    return plot_list
+
+
+def makeTiledFigure(subfigs):
+    '''
+    Take list of figures ( figure factory plot objects) to be combined into tiled image. Return single figure object with tiled subplots.
+    '''
+    modified_subfigs = []
+    start_pos = 0
+    for i in range(len(subfigs)):
+        # initialize xaxis2 and yaxis2
+        subfigs[i]['layout'][f'xaxis{i}'] = {}
+        subfigs[i]['layout'][f'yaxis{i}'] = {}
+        for j in range(len(subfigs[i].data)):
+            subfigs[i].data[j].xaxis=f'x{i}'
+            subfigs[i].data[j].yaxis=f'y{i}'
+
+        subfigs[i].layout.xaxis1.update({'anchor': f'y{i}'})
+        subfigs[i].layout.yaxis1.update({'anchor': f'x{i}', 'domain': [(.25*i), 1-(.25*i)]})
+
+    fig = go.Figure()
+    fig.add_traces(modified_subfigs)
+
+    for subfig in modified_subfigs:
+        fig.layout.update(subfig.layout)
+    return fig
+
+
+def makeHTML(fig):
+    import dash
+    from dash import dcc
+    from dash import html
+
+    app = dash.Dash()
+    app.layout = html.Div([
+        dcc.Graph(figure=fig)
+    ])
+
+    app.run_server(debug=True, use_reloader=False)  # Turn off reloader if inside Jupyter
 
 
 def main():
@@ -371,8 +432,8 @@ def main():
         sample2 = parseQuery(args.query[0])
         # merge input dicts
         merged_data = mergeHappyQuery(sample1, sample2)
-        # make 4 arrays for snp, indel, het, hom plots, for each metric
-        arrays = makePlots(merged_data, metrics)
+        # make 4 arrays for snp, indel, het, hom plots, for each metric & make plot objects
+        plots = makePlots(merged_data, metrics)
     else:
         getSampleNames(args.query[0], args.query[1])
         # check metrics are available
@@ -385,18 +446,22 @@ def main():
         # merge input dicts
         merged_data = mergeSamples(sample1, sample2, False)
         # make 4 arrays for snp, indel, het, hom plots
-        arrays = makePlots(merged_data, metrics, happy=False)
+        plots = makePlots(merged_data, metrics, happy=False)
     
-    # make plots for each metric from list of arrays
-    plots = makePlots(arrays)
-    # for each metric in plots list, add to report ????????
-    makeReport()
-    # generate output
+    # generate output filename
     if args.happy:
         output = getOutputName([args.happy, args.query[0]])
     else:
         output = getOutputName(args.query, False)
 
+    # for each metric in plots list, add to report ????????
+    makeReport(plots, output)
+
+    print(f'Type of plots: {type(plots)}')
+
+    for i in plots:
+        print(f'Type of individual: {type(i)}')
+        makeHTML(plots[i])
 
 if __name__ == "__main__":
     main()
