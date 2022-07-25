@@ -258,7 +258,7 @@ def createPlot(array1, array2, name):
     labels = [array1.pop(0), array2.pop(0)]
     if len(array1) < 1 or len(array2) < 1:
         # do something to indicate insufficient data for this metric combo??
-        return 1
+        return None
     # convert arrays to dataframe with column headers
     df = pd.DataFrame({labels[0]: np.random.randn(200), labels[1]: np.random.randn(200)+1})
     # make distribution plot object
@@ -354,14 +354,12 @@ def makePlots(data, metrics, happy=True):
     '''
     Take merged data and list of metrics. Return dictionary of plot objects (keys = metrics).
     '''
-    plot_dict = {}
     plot_list = []
     if happy:
         fptp = ['TP', 'FP']
     else:
         fptp = [SAMPLE1_NAME, SAMPLE2_NAME]
     for metric in metrics:
-        print(metric)
         # make filtered arrays for each variant category
         snp_arrays = makeArrays(data, metric, fptp, snp_indel='SNP')
         indel_arrays = makeArrays(data, metric, fptp, snp_indel='INDEL')
@@ -372,11 +370,9 @@ def makePlots(data, metrics, happy=True):
         indel_plot = createPlot(indel_arrays[0], indel_arrays[1], 'INDEL')
         het_plot = createPlot(het_arrays[0], het_arrays[1], 'HET')
         hom_plot = createPlot(hom_arrays[0], hom_arrays[1], 'HOM')
-        # 
+        # make tiled figure with all of the above
         fig = makeTiledFigure([snp_plot,indel_plot,het_plot,hom_plot])
         plot_list.append(fig)
-        # add to dictionary, group by metric
-        plot_dict[metric] = {'snp':snp_plot, 'indel':indel_plot, 'het':het_plot, 'hom':hom_plot}
     return plot_list
 
 
@@ -387,15 +383,21 @@ def makeTiledFigure(subfigs):
     modified_subfigs = []
     start_pos = 0
     for i in range(len(subfigs)):
-        # initialize xaxis2 and yaxis2
-        subfigs[i]['layout'][f'xaxis{i}'] = {}
-        subfigs[i]['layout'][f'yaxis{i}'] = {}
-        for j in range(len(subfigs[i].data)):
-            subfigs[i].data[j].xaxis=f'x{i}'
-            subfigs[i].data[j].yaxis=f'y{i}'
+        # check subfigure is not empty
+        if not subfigs[i]:
+            continue
+        # subplot suffixes cannot be 0 indexed
+        index = i + 1
+        # initialize xaxis and yaxis
+        subfigs[i]['layout'][f'xaxis{index}'] = {}
+        subfigs[i]['layout'][f'yaxis{index}'] = {}
 
-        subfigs[i].layout.xaxis1.update({'anchor': f'y{i}'})
-        subfigs[i].layout.yaxis1.update({'anchor': f'x{i}', 'domain': [(.25*i), 1-(.25*i)]})
+        for j in range(len(subfigs[i].data)):
+            subfigs[i].data[j].xaxis=f'x{index}'
+            subfigs[i].data[j].yaxis=f'y{index}'
+
+        subfigs[i]['layout'][f'xaxis{index}'].update({'anchor': f'y{index}'})
+        subfigs[i]['layout'][f'yaxis{index}'].update({'anchor': f'x{index}', 'domain': [(.25*index), 1-(.25*index)]})
 
     fig = go.Figure()
     fig.add_traces(modified_subfigs)
