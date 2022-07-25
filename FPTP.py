@@ -352,7 +352,7 @@ def makeArrays(data, metric, fptp, snp_indel=None, hethom=None):
 
 def makePlots(data, metrics, happy=True):
     '''
-    Take merged data and list of metrics. Return dictionary of plot objects (keys = metrics).
+    Take merged data and list of metrics. Return list of plot objects.
     '''
     plot_list = []
     if happy:
@@ -372,6 +372,7 @@ def makePlots(data, metrics, happy=True):
         hom_plot = createPlot(hom_arrays[0], hom_arrays[1], 'HOM')
         # make tiled figure with all of the above
         fig = makeTiledFigure([snp_plot,indel_plot,het_plot,hom_plot])
+        #fig = tempTiles([snp_plot,indel_plot,het_plot,hom_plot])
         plot_list.append(fig)
     return plot_list
 
@@ -400,10 +401,40 @@ def makeTiledFigure(subfigs):
         subfigs[i]['layout'][f'yaxis{index}'].update({'anchor': f'x{index}', 'domain': [(.25*index), 1-(.25*index)]})
 
     fig = go.Figure()
-    fig.add_traces(modified_subfigs)
 
-    for subfig in modified_subfigs:
-        fig.layout.update(subfig.layout)
+    for subfig in subfigs:
+        if subfig:
+            fig.add_traces(subfig.data[0])
+            fig.layout.update(subfig.layout)
+    return fig
+
+
+def tempTiles(subfigs):
+    if not subfigs[0] or not subfigs[1]:
+        return
+    for i in range(len(subfigs[0].data)):
+        subfigs[0].data[i].xaxis='x1'
+        subfigs[0].data[i].yaxis='y1'
+
+    subfigs[0].layout.xaxis1.update({'anchor': 'y1'})
+    subfigs[0].layout.yaxis1.update({'anchor': 'x1', 'domain': [.55, 1]})
+
+    for i in range(len(subfigs[1].data)):
+        subfigs[1].data[i].xaxis='x2'
+        subfigs[1].data[i].yaxis='y2'
+
+    # initialize xaxis2 and yaxis2
+    subfigs[1]['layout']['xaxis2'] = {}
+    subfigs[1]['layout']['yaxis2'] = {}
+
+    subfigs[1].layout.xaxis2.update({'anchor': 'y2'})
+    subfigs[1].layout.yaxis2.update({'anchor': 'x2', 'domain': [0, .45]})
+
+    fig = go.Figure()
+    fig.add_traces([subfigs[0].data[0], subfigs[1].data[0]])
+
+    fig.layout.update(subfigs[0].layout)
+    fig.layout.update(subfigs[1].layout)
     return fig
 
 
@@ -460,10 +491,11 @@ def main():
     makeReport(plots, output)
 
     print(f'Type of plots: {type(plots)}')
+    makeHTML(plots[0])
 
-    for i in plots:
-        print(f'Type of individual: {type(i)}')
-        makeHTML(plots[i])
+    #for i in plots:
+    #    print(f'Type of individual: {type(i)}')
+    #    makeHTML(i)
 
 if __name__ == "__main__":
     main()
