@@ -7,17 +7,15 @@ Author: Chris Pyatt
 
 # import libraries
 import argparse
-from msilib.schema import Error
-from operator import mod
 import re
 import sys
 import pandas as pd
 import numpy as np
-#import plotly.plotly as py
+import chart_studio.plotly as py
 import plotly.figure_factory as ff
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 import gzip
-from numpy.linalg import inv, det
 from IPython.display import HTML
 
 
@@ -499,29 +497,22 @@ def make_tiled_figure(subfigs):
     Take list of figures ( figure factory plot objects) to be combined into
     tiled image. Return single figure object with tiled subplots.
     '''
-    for i in range(len(subfigs)):
-        # check subfigure is not empty
-        if not subfigs[i]:
-            continue
-        # subplot suffixes cannot be 0 indexed
-        index = i + 1
-        # initialize xaxis and yaxis
-        subfigs[i]['layout'][f'xaxis{index}'] = {}
-        subfigs[i]['layout'][f'yaxis{index}'] = {}
+    fig = make_subplots(rows=2, cols=2)
 
-        for j in range(len(subfigs[i].data)):
-            subfigs[i].data[j].xaxis=f'x{index}'
-            subfigs[i].data[j].yaxis=f'y{index}'
-
-        subfigs[i]['layout'][f'xaxis{index}'].update({'anchor': f'y{index}'})
-        subfigs[i]['layout'][f'yaxis{index}'].update({'anchor': f'x{index}', 'domain': [(.25*index), 1-(.25*index)]})
-
-    fig = go.Figure()
-
-    for subfig in subfigs:
+    for i, subfig in enumerate(subfigs):
+        if i in (1, 2):
+            row_val = 1
+        else:
+            row_val = 2
+        if i in (1, 3):
+            col_val = 1
+        else:
+            col_val = 2
         if subfig:
-            fig.add_traces(subfig.data[0])
-            fig.layout.update(subfig.layout)
+            fig.add_trace(subfig.data[0], row=row_val, col=col_val)
+    
+    fig.update_layout(height=1000, width=1000, title_text="Subplots")
+
     return fig
 
 
@@ -589,6 +580,7 @@ def main():
     #for i in plots:
     #    print(f'Type of individual: {type(i)}')
     #    make_html(i)
+
 
 if __name__ == "__main__":
     main()
