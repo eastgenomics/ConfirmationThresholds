@@ -339,17 +339,13 @@ def create_plot(array1, array2, name):
     if len(array1) < 1 or len(array2) < 1:
         # do something to indicate insufficient data for this metric combo??
         return None
+    # do something to decide bin sizes
+
     # convert arrays to dataframe with column headers
-    plot_df = pd.DataFrame(
-        {
-            labels[0]: np.random.randn(200),
-            labels[1]: np.random.randn(200)+1
-        }
-        )
+    hist_data = [np.array(array1), np.array(array2)]
+    print(hist_data)
     # make distribution plot object
-    fig = ff.create_distplot(
-        [plot_df[c] for c in plot_df.columns], plot_df.columns, bin_size=.25
-        )
+    fig = ff.create_distplot(hist_data, labels, bin_size=2, show_curve=False)
     return fig
 
 
@@ -487,18 +483,21 @@ def make_plots(data, metrics, happy=True):
         het_plot = create_plot(het_arrays[0], het_arrays[1], 'HET')
         hom_plot = create_plot(hom_arrays[0], hom_arrays[1], 'HOM')
         # make tiled figure with all of the above
-        fig = make_tiled_figure([snp_plot, indel_plot, het_plot, hom_plot])
+        fig = make_tiled_figure(
+                                [snp_plot, indel_plot, het_plot, hom_plot],
+                                metric
+                                )
         plot_list.append(fig)
     return plot_list
 
 
-def make_tiled_figure(subfigs):
+def make_tiled_figure(subfigs, metric):
     '''
     Take list of figures ( figure factory plot objects) to be combined into
     tiled image. Return single figure object with tiled subplots.
     '''
     fig = make_subplots(rows=2, cols=2)
-
+    # decide on position and add subfigures to plot
     for i, subfig in enumerate(subfigs):
         if i in (1, 2):
             row_val = 1
@@ -510,9 +509,8 @@ def make_tiled_figure(subfigs):
             col_val = 2
         if subfig:
             fig.add_trace(subfig.data[0], row=row_val, col=col_val)
-    
-    fig.update_layout(height=1000, width=1000, title_text="Subplots")
-
+    # specify plot size and title
+    fig.update_layout(height=1000, width=1000, title_text=metric)
     return fig
 
 
@@ -575,7 +573,7 @@ def main():
     make_report(plots, output)
 
     print(f'Type of plots: {type(plots)}')
-    make_html(plots[0])
+    make_html(plots[-2])
 
     #for i in plots:
     #    print(f'Type of individual: {type(i)}')
