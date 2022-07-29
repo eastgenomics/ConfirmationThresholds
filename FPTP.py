@@ -361,7 +361,6 @@ def create_plot(array1, array2, name):
     '''
     labels = [array1.pop(0), array2.pop(0)]
     colours = ['#eb8909', '#09ebeb']
-    print(array2)
     if len(array1) < 1 or len(array2) < 1:
         # do something to indicate insufficient data for this metric combo??
         return None
@@ -448,6 +447,8 @@ def make_arrays(data, metric, fptp, snp_indel=None, hethom=None):
     sample2) of relevant metric values for plotting, split according to
     category (SNP/INDEL, het/hom).
     '''
+    print(len(data))
+    print(metric, fptp, snp_indel, hethom)
     array1 = [fptp[0]]
     array2 = [fptp[1]]
     if snp_indel:
@@ -483,11 +484,14 @@ def make_arrays(data, metric, fptp, snp_indel=None, hethom=None):
             array1.append(float(data[item][metric]))
         except KeyError:
             pass
+    print(len(filtered_keys_1))
+    print(filtered_keys_2)
     for item in filtered_keys_2:
         try:
             array2.append(float(data[item][metric]))
         except KeyError:
             pass
+    print(array2)
     return [array1, array2]
 
 
@@ -575,7 +579,10 @@ def main():
         sample1 = parse_happy(args.happy)
         sample2 = parse_query(args.query[0])
         # merge input dicts
+        print(f'Length of happy dict: {len(sample1)}')
+        print(f'Length of query dict: {len(sample2)}')
         merged_data = merge_happy_query(sample1, sample2)
+        print(f'Length of merged dict: {len(merged_data)}')
         # make 4 arrays for snp, indel, het, hom plots, for each metric & make plot objects
         plots = make_plots(merged_data, metrics)
     else:
