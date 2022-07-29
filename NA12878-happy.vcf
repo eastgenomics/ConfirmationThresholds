@@ -1,0 +1,200 @@
+##fileformat=VCFv4.1
+##FILTER=<ID=PASS,Description="All filters passed">
+##fileDate=20220705
+##source=RTG Tools 3.8.1 / Core unknown (2017-06-03)
+##CL=vcfeval -b /tmp/truth.ppVeZC55.vcf.gz -c /tmp/query.pp0gsLlO.vcf.gz -t /data/hs37d5.sdf -o /tmp/vcfeval.result7Hisag.dir -T 2 -m ga4gh --ref-overlap --all-records -f QUAL
+##contig=<ID=1,length=249250621>
+##contig=<ID=2,length=243199373>
+##contig=<ID=3,length=198022430>
+##contig=<ID=4,length=191154276>
+##contig=<ID=5,length=180915260>
+##contig=<ID=6,length=171115067>
+##contig=<ID=7,length=159138663>
+##contig=<ID=8,length=146364022>
+##contig=<ID=9,length=141213431>
+##contig=<ID=10,length=135534747>
+##contig=<ID=11,length=135006516>
+##contig=<ID=12,length=133851895>
+##contig=<ID=13,length=115169878>
+##contig=<ID=14,length=107349540>
+##contig=<ID=15,length=102531392>
+##contig=<ID=16,length=90354753>
+##contig=<ID=17,length=81195210>
+##contig=<ID=18,length=78077248>
+##contig=<ID=19,length=59128983>
+##contig=<ID=20,length=63025520>
+##contig=<ID=21,length=48129895>
+##contig=<ID=22,length=51304566>
+##contig=<ID=X,length=155270560>
+##contig=<ID=Y,length=59373566>
+##contig=<ID=MT,length=16569>
+##INFO=<ID=BS,Number=.,Type=Integer,Description="Benchmarking superlocus ID for these variants.">
+##INFO=<ID=CALL_WEIGHT,Number=1,Type=Float,Description="Call weight (equivalent number of truth variants). When unspecified, assume 1.0">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##FORMAT=<ID=BD,Number=1,Type=String,Description="Decision for call (TP/FP/FN/N)">
+##FORMAT=<ID=BK,Number=1,Type=String,Description="Sub-type for decision (match/mismatch type)">
+##FORMAT=<ID=BI,Number=1,Type=String,Description="Additional comparison information">
+##FORMAT=<ID=QQ,Number=1,Type=Float,Description="Variant quality for ROC creation.">
+##INFO=<ID=Regions,Number=.,Type=String,Description="Tags for regions.">
+##FORMAT=<ID=BVT,Number=1,Type=String,Description="High-level variant type (SNP|INDEL).">
+##FORMAT=<ID=BLT,Number=1,Type=String,Description="High-level location type (het|homref|hetalt|homalt|nocall).">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	TRUTH	QUERY
+1	949608	.	G	A	.	.	BS=949608;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|0:TP:gm:3222.77:ti:SNP:het	0/1:TP:gm:3222.77:ti:SNP:het
+1	949654	.	A	G	.	.	BS=949654;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:8941.77:ti:SNP:homalt	1/1:TP:gm:8941.77:ti:SNP:homalt
+1	981931	.	A	G	.	.	BS=981931;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	0|1:TP:gm:3123.77:ti:SNP:het	0/1:TP:gm:3123.77:ti:SNP:het
+1	982994	.	T	C	.	.	BS=982994;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	0|1:TP:gm:3999.77:ti:SNP:het	0/1:TP:gm:3999.77:ti:SNP:het
+1	984302	.	T	C	.	.	BS=984302;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	0|1:TP:gm:1790.77:ti:SNP:het	0/1:TP:gm:1790.77:ti:SNP:het
+1	987200	.	C	T	.	.	BS=987200;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	0|1:TP:gm:3400.77:ti:SNP:het	0/1:TP:gm:3400.77:ti:SNP:het
+1	990280	.	C	T	.	.	BS=990280;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:8152.77:ti:SNP:homalt	1/1:TP:gm:8152.77:ti:SNP:homalt
+1	1277533	.	T	C	.	.	BS=1277533;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:7735.77:ti:SNP:homalt	1/1:TP:gm:7735.77:ti:SNP:homalt
+1	2337277	.	C	T	.	.	BS=2337277;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|0:TP:gm:2135.77:ti:SNP:het	0/1:TP:gm:2135.77:ti:SNP:het
+1	2340073	.	C	G	.	.	BS=2340073;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	0|1:TP:gm:3604.77:tv:SNP:het	0/1:TP:gm:3604.77:tv:SNP:het
+1	2340200	.	T	C	.	.	BS=2340200	GT:QQ:BD:BK:BI:BVT:BLT	.:.:UNK:.:.:NOCALL:nocall	0/1:3873.77:UNK:.:ti:SNP:het
+1	3753136	.	A	T	.	.	BS=3753136;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:3914.77:tv:SNP:homalt	1/1:TP:gm:3914.77:tv:SNP:homalt
+1	3755675	.	T	C	.	.	BS=3755675;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:4472.77:ti:SNP:homalt	1/1:TP:gm:4472.77:ti:SNP:homalt
+1	3761479	.	C	T	.	.	BS=3761479;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:4724.77:ti:SNP:homalt	1/1:TP:gm:4724.77:ti:SNP:homalt
+1	5935162	.	A	T	.	.	BS=5935162	GT:QQ:BD:BK:BI:BVT:BLT	.:.:UNK:.:.:NOCALL:nocall	1/1:4793.77:UNK:.:tv:SNP:homalt
+1	6505824	.	A	C	.	.	BS=6505824	GT:QQ:BD:BK:BI:BVT:BLT	.:.:UNK:.:.:NOCALL:nocall	0/1:168.77:UNK:.:tv:SNP:het
+1	6505827	.	A	C	.	.	BS=6505827	GT:QQ:BD:BK:BI:BVT:BLT	.:.:UNK:.:.:NOCALL:nocall	0/1:174.77:UNK:.:tv:SNP:het
+1	6505833	.	A	C	.	.	BS=6505833	GT:QQ:BD:BK:BI:BVT:BLT	.:.:UNK:.:.:NOCALL:nocall	0/1:135.77:UNK:.:tv:SNP:het
+1	6505836	.	CAGCTT	C	.	.	BS=6505837	GT:QQ:BD:BK:BI:BVT:BLT	.:.:UNK:.:.:NOCALL:nocall	0/1:128.73:UNK:.:d1_5:INDEL:het
+1	6529182	.	TTCC	T	.	.	BS=6529183;Regions=CONF,TS_contained	GT:QQ:BD:BK:BI:BVT:BLT	.:.:.:.:.:NOCALL:nocall	0/1:255.73:FP:.:d1_5:INDEL:het
+1	7723957	.	G	A	.	.	BS=7723957;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|0:TP:gm:3661.77:ti:SNP:het	0/1:TP:gm:3661.77:ti:SNP:het
+1	8418644	.	C	A	.	.	BS=8418644;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	0|1:TP:gm:5586.77:tv:SNP:het	0/1:TP:gm:5586.77:tv:SNP:het
+1	8418650	.	T	C	.	.	BS=8418650;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	0|1:TP:gm:5549.77:ti:SNP:het	0/1:TP:gm:5549.77:ti:SNP:het
+1	8421203	.	T	C	.	.	BS=8421203;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	0|1:TP:gm:4324.77:ti:SNP:het	0/1:TP:gm:4324.77:ti:SNP:het
+1	8425900	.	T	C	.	.	BS=8425900;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	0|1:TP:gm:2924.77:ti:SNP:het	0/1:TP:gm:2924.77:ti:SNP:het
+1	10596341	.	C	T	.	.	BS=10596341;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|0:TP:gm:1618.77:ti:SNP:het	0/1:TP:gm:1618.77:ti:SNP:het
+1	11205058	.	C	T	.	.	BS=11205058;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:5859.77:ti:SNP:homalt	1/1:TP:gm:5859.77:ti:SNP:homalt
+1	11288758	.	G	A	.	.	BS=11288758;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:4504.77:ti:SNP:homalt	1/1:TP:gm:4504.77:ti:SNP:homalt
+1	11301714	.	A	G	.	.	BS=11301714;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:4939.77:ti:SNP:homalt	1/1:TP:gm:4939.77:ti:SNP:homalt
+1	11854457	.	G	A	.	.	BS=11854457;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:7356.77:ti:SNP:homalt	1/1:TP:gm:7356.77:ti:SNP:homalt
+1	11854476	.	T	G	.	.	BS=11854476;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	0|1:TP:gm:2611.77:tv:SNP:het	0/1:TP:gm:2611.77:tv:SNP:het
+1	11854896	.	G	A	.	.	BS=11854896;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	0|1:TP:gm:2021.77:ti:SNP:het	0/1:TP:gm:2021.77:ti:SNP:het
+1	11856378	.	G	A	.	.	BS=11856378;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|0:TP:gm:2752.77:ti:SNP:het	0/1:TP:gm:2752.77:ti:SNP:het
+1	11863057	.	G	A	.	.	BS=11863057;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	0|1:TP:gm:2658.77:ti:SNP:het	0/1:TP:gm:2658.77:ti:SNP:het
+1	12401868	.	A	C	.	.	BS=12401868;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:4976.77:tv:SNP:homalt	1/1:TP:gm:4976.77:tv:SNP:homalt
+1	16374533	.	G	C	.	.	BS=16374533	GT:QQ:BD:BK:BI:BVT:BLT	.:.:UNK:.:.:NOCALL:nocall	0/1:2303.77:UNK:.:tv:SNP:het
+1	16375063	.	C	G	.	.	BS=16375063	GT:QQ:BD:BK:BI:BVT:BLT	.:.:UNK:.:.:NOCALL:nocall	0/1:3565.77:UNK:.:tv:SNP:het
+1	16375064	.	A	C	.	.	BS=16375063	GT:QQ:BD:BK:BI:BVT:BLT	.:.:UNK:.:.:NOCALL:nocall	0/1:3565.77:UNK:.:tv:SNP:het
+1	16376191	.	C	T	.	.	BS=16376191	GT:QQ:BD:BK:BI:BVT:BLT	.:.:UNK:.:.:NOCALL:nocall	0/1:2074.77:UNK:.:ti:SNP:het
+1	16376319	.	T	C	.	.	BS=16376319	GT:QQ:BD:BK:BI:BVT:BLT	.:.:UNK:.:.:NOCALL:nocall	0/1:2971.77:UNK:.:ti:SNP:het
+1	16377999	.	C	T	.	.	BS=16377999	GT:QQ:BD:BK:BI:BVT:BLT	.:.:UNK:.:.:NOCALL:nocall	0/1:4166.77:UNK:.:ti:SNP:het
+1	16378000	.	A	G	.	.	BS=16377999	GT:QQ:BD:BK:BI:BVT:BLT	.:.:UNK:.:.:NOCALL:nocall	0/1:4166.77:UNK:.:ti:SNP:het
+1	16378215	.	C	T	.	.	BS=16378215	GT:QQ:BD:BK:BI:BVT:BLT	.:.:UNK:.:.:NOCALL:nocall	0/1:2279.77:UNK:.:ti:SNP:het
+1	16378725	.	A	T	.	.	BS=16378725	GT:QQ:BD:BK:BI:BVT:BLT	.:.:UNK:.:.:NOCALL:nocall	0/1:2592.77:UNK:.:tv:SNP:het
+1	16380196	.	T	C	.	.	BS=16380196	GT:QQ:BD:BK:BI:BVT:BLT	.:.:UNK:.:.:NOCALL:nocall	1/1:8821.77:UNK:.:ti:SNP:homalt
+1	16380243	.	A	G	.	.	BS=16380243	GT:QQ:BD:BK:BI:BVT:BLT	.:.:UNK:.:.:NOCALL:nocall	1/1:10383.8:UNK:.:ti:SNP:homalt
+1	16380252	.	C	T	.	.	BS=16380252	GT:QQ:BD:BK:BI:BVT:BLT	.:.:UNK:.:.:NOCALL:nocall	1/1:10253.8:UNK:.:ti:SNP:homalt
+1	16464673	.	G	A	.	.	BS=16464673;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|0:TP:gm:3088.77:ti:SNP:het	0/1:TP:gm:3088.77:ti:SNP:het
+1	16475123	.	C	T	.	.	BS=16475123;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|0:TP:gm:4474.77:ti:SNP:het	0/1:TP:gm:4474.77:ti:SNP:het
+1	16475126	.	C	T	.	.	BS=16475126;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|0:TP:gm:4464.77:ti:SNP:het	0/1:TP:gm:4464.77:ti:SNP:het
+1	17312743	.	C	T	.	.	BS=17312743;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:10754.8:ti:SNP:homalt	1/1:TP:gm:10754.8:ti:SNP:homalt
+1	17313343	.	G	A	.	.	BS=17313343;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:7559.77:ti:SNP:homalt	1/1:TP:gm:7559.77:ti:SNP:homalt
+1	17313654	.	C	T	.	.	BS=17313654;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:10781.8:ti:SNP:homalt	1/1:TP:gm:10781.8:ti:SNP:homalt
+1	17314942	.	G	A	.	.	BS=17314942;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:7300.77:ti:SNP:homalt	1/1:TP:gm:7300.77:ti:SNP:homalt
+1	17319011	.	G	A	.	.	BS=17319011;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:6918.77:ti:SNP:homalt	1/1:TP:gm:6918.77:ti:SNP:homalt
+1	17380497	.	G	T	.	.	BS=17380497;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:5340.77:tv:SNP:homalt	1/1:TP:gm:5340.77:tv:SNP:homalt
+1	19027239	.	A	G	.	.	BS=19027239;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|0:TP:gm:4283.77:ti:SNP:het	0/1:TP:gm:4283.77:ti:SNP:het
+1	19201956	.	A	G	.	.	BS=19201956;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:6420.77:ti:SNP:homalt	1/1:TP:gm:6420.77:ti:SNP:homalt
+1	19202896	.	G	A	.	.	BS=19202896;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|0:TP:gm:1629.77:ti:SNP:het	0/1:TP:gm:1629.77:ti:SNP:het
+1	19202917	.	T	C	.	.	BS=19202917;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:6058.77:ti:SNP:homalt	1/1:TP:gm:6058.77:ti:SNP:homalt
+1	19202926	.	T	C	.	.	BS=19202926;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:5985.77:ti:SNP:homalt	1/1:TP:gm:5985.77:ti:SNP:homalt
+1	19203997	.	C	G	.	.	BS=19203997;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|0:TP:gm:3562.77:tv:SNP:het	0/1:TP:gm:3562.77:tv:SNP:het
+1	19565338	.	C	T	.	.	BS=19565338;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	0|1:TP:gm:2501.77:ti:SNP:het	0/1:TP:gm:2501.77:ti:SNP:het
+1	19565344	.	C	G	.	.	BS=19565344;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	0|1:TP:gm:2528.77:tv:SNP:het	0/1:TP:gm:2528.77:tv:SNP:het
+1	19566881	.	C	T	.	.	BS=19566881;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|0:TP:gm:2583.77:ti:SNP:het	0/1:TP:gm:2583.77:ti:SNP:het
+1	19568972	.	A	G	.	.	BS=19568972;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	0|1:TP:gm:1759.77:ti:SNP:het	0/1:TP:gm:1759.77:ti:SNP:het
+1	20960230	.	C	T	.	.	BS=20960230;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:7636.77:ti:SNP:homalt	1/1:TP:gm:7636.77:ti:SNP:homalt
+1	20972048	.	G	A	.	.	BS=20972048;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:3478.77:ti:SNP:homalt	1/1:TP:gm:3478.77:ti:SNP:homalt
+1	20987873	.	G	C	.	.	BS=20987873;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:6127.77:tv:SNP:homalt	1/1:TP:gm:6127.77:tv:SNP:homalt
+1	21889635	.	T	C	.	.	BS=21889635;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:7398.77:ti:SNP:homalt	1/1:TP:gm:7398.77:ti:SNP:homalt
+1	21904131	.	T	C	.	.	BS=21904131;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|0:TP:gm:2902.77:ti:SNP:het	0/1:TP:gm:2902.77:ti:SNP:het
+1	22191454	.	G	A	.	.	BS=22191454;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:12504.8:ti:SNP:homalt	1/1:TP:gm:12504.8:ti:SNP:homalt
+1	22206649	.	T	C	.	.	BS=22206649;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:7575.77:ti:SNP:homalt	1/1:TP:gm:7575.77:ti:SNP:homalt
+1	22206942	.	G	A	.	.	BS=22206942;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:9377.77:ti:SNP:homalt	1/1:TP:gm:9377.77:ti:SNP:homalt
+1	22207235	.	T	C	.	.	BS=22207235;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:11573.8:ti:SNP:homalt	1/1:TP:gm:11573.8:ti:SNP:homalt
+1	22214127	.	A	G	.	.	BS=22214127;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:8576.77:ti:SNP:homalt	1/1:TP:gm:8576.77:ti:SNP:homalt
+1	22217108	.	G	A	.	.	BS=22217108;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:6579.77:ti:SNP:homalt	1/1:TP:gm:6579.77:ti:SNP:homalt
+1	24134721	.	T	C	.	.	BS=24134721;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:5251.77:ti:SNP:homalt	1/1:TP:gm:5251.77:ti:SNP:homalt
+1	24658063	.	C	G	.	.	BS=24658063;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|0:TP:gm:2344.77:tv:SNP:het	0/1:TP:gm:2344.77:tv:SNP:het
+1	24668667	.	C	G	.	.	BS=24668667;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|0:TP:gm:2186.77:tv:SNP:het	0/1:TP:gm:2186.77:tv:SNP:het
+1	24690764	.	T	A	.	.	BS=24690764;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	0|1:TP:gm:2210.77:tv:SNP:het	0/1:TP:gm:2210.77:tv:SNP:het
+1	26131654	.	G	A	.	.	BS=26131654;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:7532.77:ti:SNP:homalt	1/1:TP:gm:7532.77:ti:SNP:homalt
+1	26138262	.	T	C	.	.	BS=26138262;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:5539.77:ti:SNP:homalt	1/1:TP:gm:5539.77:ti:SNP:homalt
+1	26140573	.	C	A	.	.	BS=26140573;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:5629.77:tv:SNP:homalt	1/1:TP:gm:5629.77:tv:SNP:homalt
+1	26786627	.	G	A	.	.	BS=26786627;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|0:TP:gm:1314.77:ti:SNP:het	0/1:TP:gm:1314.77:ti:SNP:het
+1	27426796	.	T	C	.	.	BS=27426796;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:8130.77:ti:SNP:homalt	1/1:TP:gm:8130.77:ti:SNP:homalt
+1	27427041	.	T	C	.	.	BS=27427041;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:9887.77:ti:SNP:homalt	1/1:TP:gm:9887.77:ti:SNP:homalt
+1	27428321	.	T	C	.	.	BS=27428321;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	0|1:TP:gm:1891.77:ti:SNP:het	0/1:TP:gm:1891.77:ti:SNP:het
+1	27480757	.	A	G	.	.	BS=27480757;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	0|1:TP:gm:2952.77:ti:SNP:het	0/1:TP:gm:2952.77:ti:SNP:het
+1	27875824	.	C	T	.	.	BS=27875824;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:11128.8:ti:SNP:homalt	1/1:TP:gm:11128.8:ti:SNP:homalt
+1	27876482	.	C	A	.	.	BS=27876482;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	0|1:TP:gm:3271.77:tv:SNP:het	0/1:TP:gm:3271.77:tv:SNP:het
+1	29529699	.	T	C	.	.	BS=29529699;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	0|1:TP:gm:2195.77:ti:SNP:het	0/1:TP:gm:2195.77:ti:SNP:het
+1	29542637	.	A	G	.	.	BS=29542637;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	0|1:TP:gm:2093.77:ti:SNP:het	0/1:TP:gm:2093.77:ti:SNP:het
+1	31426815	.	A	G	.	.	BS=31426815;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:4503.77:ti:SNP:homalt	1/1:TP:gm:4503.77:ti:SNP:homalt
+1	33245802	.	C	G	.	.	BS=33245802;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	0|1:TP:gm:2389.77:tv:SNP:het	0/1:TP:gm:2389.77:tv:SNP:het
+1	39748921	.	G	A	.	.	BS=39748921;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:3228.77:ti:SNP:homalt	1/1:TP:gm:3228.77:ti:SNP:homalt
+1	39852990	.	T	C	.	.	BS=39852990;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	0|1:TP:gm:2534.77:ti:SNP:het	0/1:TP:gm:2534.77:ti:SNP:het
+1	40349131	.	G	A	.	.	BS=40349131;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:4192.77:ti:SNP:homalt	1/1:TP:gm:4192.77:ti:SNP:homalt
+1	40773123	.	G	C	.	.	BS=40773123;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|0:TP:gm:2792.77:tv:SNP:het	0/1:TP:gm:2792.77:tv:SNP:het
+1	41285087	.	T	C	.	.	BS=41285087;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:6195.77:ti:SNP:homalt	1/1:TP:gm:6195.77:ti:SNP:homalt
+1	41296828	.	T	G	.	.	BS=41296828;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|0:TP:gm:4192.77:tv:SNP:het	0/1:TP:gm:4192.77:tv:SNP:het
+1	43212431	.	A	G	.	.	BS=43212431;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:8443.77:ti:SNP:homalt	1/1:TP:gm:8443.77:ti:SNP:homalt
+1	43886494	.	C	T	.	.	BS=43886494;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	0|1:TP:gm:2566.77:ti:SNP:het	0/1:TP:gm:2566.77:ti:SNP:het
+1	43906896	.	A	G	.	.	BS=43906896;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	0|1:TP:gm:2220.77:ti:SNP:het	0/1:TP:gm:2220.77:ti:SNP:het
+1	43909265	.	T	C	.	.	BS=43909265;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	0|1:TP:gm:3121.77:ti:SNP:het	0/1:TP:gm:3121.77:ti:SNP:het
+1	45444038	.	G	A	.	.	BS=45444038;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|0:TP:gm:2664.77:ti:SNP:het	0/1:TP:gm:2664.77:ti:SNP:het
+1	45479709	.	A	G	.	.	BS=45479709;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	0|1:TP:gm:2281.77:ti:SNP:het	0/1:TP:gm:2281.77:ti:SNP:het
+1	45797505	.	C	G	.	.	BS=45797505;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|0:TP:gm:3186.77:tv:SNP:het	0/1:TP:gm:3186.77:tv:SNP:het
+1	46655158	.	T	C	.	.	BS=46655158;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:6910.77:ti:SNP:homalt	1/1:TP:gm:6910.77:ti:SNP:homalt
+1	46660295	.	T	C	.	.	BS=46660295;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:8039.77:ti:SNP:homalt	1/1:TP:gm:8039.77:ti:SNP:homalt
+1	47717189	.	A	G	.	.	BS=47717189;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:6613.77:ti:SNP:homalt	1/1:TP:gm:6613.77:ti:SNP:homalt
+1	47882497	.	C	T	.	.	BS=47882497;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	0|1:TP:gm:3142.77:ti:SNP:het	0/1:TP:gm:3142.77:ti:SNP:het
+1	53676448	.	G	A	.	.	BS=53676448;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:7256.77:ti:SNP:homalt	1/1:TP:gm:7256.77:ti:SNP:homalt
+1	53679229	.	A	G	.	.	BS=53679229;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|0:TP:gm:2209.77:ti:SNP:het	0/1:TP:gm:2209.77:ti:SNP:het
+1	55224131	.	T	C	.	.	BS=55224131;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	0|1:TP:gm:3831.77:ti:SNP:het	0/1:TP:gm:3831.77:ti:SNP:het
+1	55224751	.	C	A	.	.	BS=55224751;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	0|1:TP:gm:3549.77:tv:SNP:het	0/1:TP:gm:3549.77:tv:SNP:het
+1	55319902	.	A	G	.	.	BS=55319902;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:4747.77:ti:SNP:homalt	1/1:TP:gm:4747.77:ti:SNP:homalt
+1	55518467	.	A	G	.	.	BS=55518467;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:7116.77:ti:SNP:homalt	1/1:TP:gm:7116.77:ti:SNP:homalt
+1	55523033	.	A	G	.	.	BS=55523033;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:7660.77:ti:SNP:homalt	1/1:TP:gm:7660.77:ti:SNP:homalt
+1	55524197	.	A	G	.	.	BS=55524197;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:7604.77:ti:SNP:homalt	1/1:TP:gm:7604.77:ti:SNP:homalt
+1	55524237	.	G	A	.	.	BS=55524237;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:8152.77:ti:SNP:homalt	1/1:TP:gm:8152.77:ti:SNP:homalt
+1	55529187	.	G	A	.	.	BS=55529187;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:8172.77:ti:SNP:homalt	1/1:TP:gm:8172.77:ti:SNP:homalt
+1	57340727	.	C	A	.	.	BS=57340727;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|0:TP:gm:643.77:tv:SNP:het	0/1:TP:gm:643.77:tv:SNP:het
+1	57422484	.	C	T	.	.	BS=57422484;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:3694.77:ti:SNP:homalt	1/1:TP:gm:3694.77:ti:SNP:homalt
+1	59042181	.	G	T	.	.	BS=59042181;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	0|1:TP:gm:3469.77:tv:SNP:het	0/1:TP:gm:3469.77:tv:SNP:het
+1	59042388	.	C	G	.	.	BS=59042388;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	0|1:TP:gm:4120.77:tv:SNP:het	0/1:TP:gm:4120.77:tv:SNP:het
+1	59142713	.	T	C	.	.	BS=59142713;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	0|1:TP:gm:1009.77:ti:SNP:het	0/1:TP:gm:1009.77:ti:SNP:het
+1	59147926	.	T	C	.	.	BS=59147926;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	0|1:TP:gm:2465.77:ti:SNP:het	0/1:TP:gm:2465.77:ti:SNP:het
+1	63789088	.	C	T	.	.	BS=63789088	GT:QQ:BD:BK:BI:BVT:BLT	.:.:UNK:.:.:NOCALL:nocall	0/1:4539.77:UNK:.:ti:SNP:het
+1	66058513	.	A	G	.	.	BS=66058513;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	0|1:TP:gm:843.77:ti:SNP:het	0/1:TP:gm:843.77:ti:SNP:het
+1	66067109	.	T	C	.	.	BS=66067109;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	0|1:TP:gm:617.77:ti:SNP:het	0/1:TP:gm:617.77:ti:SNP:het
+1	76227022	.	A	G	.	.	BS=76227022;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|0:TP:gm:1454.77:ti:SNP:het	0/1:TP:gm:1454.77:ti:SNP:het
+1	78392446	.	G	A	.	.	BS=78392446;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|0:TP:gm:1425.77:ti:SNP:het	0/1:TP:gm:1425.77:ti:SNP:het
+1	92944314	.	CAGAGAG	C,CAGAGAGAG	.	.	BS=92944315;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|2:TP:gm:1665.73:d6_15,i1_5:INDEL:hetalt	0/1:TP:gm:1665.73:d6_15:INDEL:het
+1	92944320	.	G	GAG	.	.	BS=92944315;Regions=CONF,TS_contained	GT:QQ:BD:BK:BI:BVT:BLT	.:.:.:.:.:NOCALL:nocall	0/1:1665.73:TP:gm:i1_5:INDEL:het
+1	92946479	.	G	A	.	.	BS=92946479;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:8339.77:ti:SNP:homalt	1/1:TP:gm:8339.77:ti:SNP:homalt
+1	94466659	.	A	G	.	.	BS=94466659;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|0:TP:gm:2222.77:ti:SNP:het	0/1:TP:gm:2222.77:ti:SNP:het
+1	94471075	.	A	G	.	.	BS=94471075;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:5236.77:ti:SNP:homalt	1/1:TP:gm:5236.77:ti:SNP:homalt
+1	94473845	.	T	C	.	.	BS=94473845;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|0:TP:gm:3318.77:ti:SNP:het	0/1:TP:gm:3318.77:ti:SNP:het
+1	94474328	.	T	C	.	.	BS=94474328;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|0:TP:gm:1611.77:ti:SNP:het	0/1:TP:gm:1611.77:ti:SNP:het
+1	94476388	.	C	G	.	.	BS=94476388;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|0:TP:gm:3235.77:tv:SNP:het	0/1:TP:gm:3235.77:tv:SNP:het
+1	94512565	.	C	T	.	.	BS=94512565;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|0:TP:gm:2719.77:ti:SNP:het	0/1:TP:gm:2719.77:ti:SNP:het
+1	94578548	.	T	C	.	.	BS=94578548;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:3116.77:ti:SNP:homalt	1/1:TP:gm:3116.77:ti:SNP:homalt
+1	94639447	.	C	T	.	.	BS=94639447;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:3125.77:ti:SNP:homalt	1/1:TP:gm:3125.77:ti:SNP:homalt
+1	97981395	.	T	C	.	.	BS=97981395;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	0|1:TP:gm:872.77:ti:SNP:het	0/1:TP:gm:872.77:ti:SNP:het
+1	97981421	.	C	T	.	.	BS=97981421;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|0:TP:gm:817.77:ti:SNP:het	0/1:TP:gm:817.77:ti:SNP:het
+1	98348885	.	G	A	.	.	BS=98348885;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:1952.77:ti:SNP:homalt	1/1:TP:gm:1952.77:ti:SNP:homalt
+1	100336361	.	C	T	.	.	BS=100336361;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|0:TP:gm:1101.77:ti:SNP:het	0/1:TP:gm:1101.77:ti:SNP:het
+1	100672060	.	T	C	.	.	BS=100672060;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:4807.77:ti:SNP:homalt	1/1:TP:gm:4807.77:ti:SNP:homalt
+1	103354138	.	A	G	.	.	BS=103354138;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	0|1:TP:gm:1163.77:ti:SNP:het	0/1:TP:gm:1163.77:ti:SNP:het
+1	103354428	.	A	G	.	.	BS=103354428;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	0|1:TP:gm:1160.77:ti:SNP:het	0/1:TP:gm:1160.77:ti:SNP:het
+1	103405892	.	G	A	.	.	BS=103405892;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|0:TP:gm:1009.77:ti:SNP:het	0/1:TP:gm:1009.77:ti:SNP:het
+1	103496805	.	GA	G	.	.	BS=103496806;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:FN:am:.:d1_5:INDEL:homalt	0/1:FP:am:255.73:d1_5:INDEL:het
+1	108703834	.	C	T	.	.	BS=108703834;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	0|1:TP:gm:1141.77:ti:SNP:het	0/1:TP:gm:1141.77:ti:SNP:het
+1	108728484	.	T	C	.	.	BS=108728484;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|0:TP:gm:1011.77:ti:SNP:het	0/1:TP:gm:1011.77:ti:SNP:het
+1	109465165	.	ACTT	A	.	.	BS=109465166;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	0|1:TP:gm:1288.73:d1_5:INDEL:het	0/1:TP:gm:1288.73:d1_5:INDEL:het
+1	110170896	.	T	C	.	.	BS=110170896;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|1:TP:gm:6415.77:ti:SNP:homalt	1/1:TP:gm:6415.77:ti:SNP:homalt
+1	110173775	.	G	T	.	.	BS=110173775;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	1|0:TP:gm:2261.77:tv:SNP:het	0/1:TP:gm:2261.77:tv:SNP:het
+1	110709719	.	T	C	.	.	BS=110709719;Regions=CONF,TS_contained	GT:BD:BK:QQ:BI:BVT:BLT	0|1:TP:gm:3429.77:ti:SNP:het	0/1:TP:gm:3429.77:ti:SNP:het
