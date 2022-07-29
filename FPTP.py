@@ -9,7 +9,7 @@ Author: Chris Pyatt
 import argparse
 import re
 import sys
-import pandas as pd
+import vcf
 import numpy as np
 import chart_studio.plotly as py
 import plotly.figure_factory as ff
@@ -217,10 +217,11 @@ def parse_query(query, happy=True):
             variant_dict = {}
             for line in file:
                 if not line.startswith('#'):
-                    variant = (
-                        line.split('\t')[0] + '_' + line.split('\t')[1] + '_'
-                        + line.split('\t')[3] + '_' + line.split('\t')[4]
-                    )
+                    chrom = line.split('\t')[0]
+                    pos = line.split('\t')[1]
+                    ref = line.split('\t')[3]
+                    alt = line.split('\t')[4]
+                    variant = (f'{chrom}_{pos}_{ref}_{alt}')
                     vcf_info = line.split('\t')[7].split(';')
                     vcf_format = line.split('\t')[8].split(':')
                     vcf_genotype = line.rstrip().split('\t')[9].split(':')
@@ -246,8 +247,8 @@ def parse_query(query, happy=True):
                             value = True
                         metric_dict[name] = value
                     # add format/genotype metrics to dictionary
-                    for i in range(len(vcf_format)):
-                        name = 'format_' + vcf_format[i]
+                    for i, metric in enumerate(vcf_format):
+                        name = 'format_' + metric
                         value = vcf_genotype[i]
                         metric_dict[name] = value
                     variant_dict[variant] = metric_dict
@@ -311,14 +312,22 @@ def parse_happy(happy):
                 # 'variant quality for ROC creation', etc.
                 cat_dict = {}
                 if not line.startswith('#'):
-                    variant = (
-                        line.split('\t')[0] + '_' + line.split('\t')[1] + '_'
-                        + line.split('\t')[3] + '_' + line.split('\t')[4]
-                    )
-                    query_info = line.split('\t')[10].split(':')
-                    cat_dict['TPFP_or_samplename'] = query_info[1]
-                    cat_dict['snp_indel'] = query_info[5]
-                    cat_dict['HETHOM'] = query_info[6].rstrip()
+                    chrom = line.split('\t')[0]
+                    pos = line.split('\t')[1]
+                    ref = line.split('\t')[3]
+                    alt = line.split('\t')[4]
+                    variant = (f'{chrom}_{pos}_{ref}_{alt}')
+                    query_format = line.split('\t')[8].split(':')
+                    query_values = line.rstrip().split('\t')[10].split(':')
+                    # add format/query metrics to dictionary (format varies)
+                    # so can't rely on simple string splitting
+                    query_dict = {}
+                    for i, metric in enumerate(query_format):
+                        value = query_values[i]
+                        query_dict[metric] = value
+                    cat_dict['TPFP_or_samplename'] = query_dict['BD']
+                    cat_dict['snp_indel'] = query_dict['BVT']
+                    cat_dict['HETHOM'] = query_dict['BLT']
                 else:
                     continue
                 variant_dict[variant] = cat_dict
@@ -351,6 +360,8 @@ def create_plot(array1, array2, name):
     return plot object. Name variable to be title of plot?
     '''
     labels = [array1.pop(0), array2.pop(0)]
+    colours = ['#eb8909', '#09ebeb']
+    print(array2)
     if len(array1) < 1 or len(array2) < 1:
         # do something to indicate insufficient data for this metric combo??
         return None
@@ -358,8 +369,12 @@ def create_plot(array1, array2, name):
     bin_size = decide_bins(array1)
     # convert arrays to dataframe with column headers
     hist_data = [np.array(array1), np.array(array2)]
-    # make distribution plot object
-    fig = ff.create_distplot(hist_data, labels, bin_size=bin_size, show_curve=False)
+    # make distribution plot object - no curves as gets broken by symmetrical
+    # matrix (all values the same in this case)
+    fig = ff.create_distplot(
+                             hist_data, labels, bin_size=bin_size,
+                             colors=colours, show_curve=False
+                             )
     return fig
 
 
