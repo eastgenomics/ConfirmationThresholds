@@ -16,6 +16,7 @@ import plotly.figure_factory as ff
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import gzip
+import math
 from IPython.display import HTML
 
 
@@ -330,6 +331,20 @@ def parse_happy(happy):
     return variant_dict
 
 
+def decide_bins(array):
+    '''
+    Take numpy array & use number and range of values to determine
+    appropriate bin size for histopgram. Returns bin size as integer.
+    '''
+    array_length = len(array)
+    array_range = max(array) - min(array)
+    # Use modified Sturge's rule to decide number of bins
+    num_bins = (1 + 3.322 * math.log10(array_length)) * 3
+    # Divide the range of values by the number of bins to get bin size
+    bin_size = array_range / num_bins
+    return bin_size
+
+
 def create_plot(array1, array2, name):
     '''
     Given two arrays of metric values, plot corresponding distributions and
@@ -339,13 +354,12 @@ def create_plot(array1, array2, name):
     if len(array1) < 1 or len(array2) < 1:
         # do something to indicate insufficient data for this metric combo??
         return None
-    # do something to decide bin sizes
-
+    # decide bin sizes based on array1 (should be TPs so the longer dataset)
+    bin_size = decide_bins(array1)
     # convert arrays to dataframe with column headers
     hist_data = [np.array(array1), np.array(array2)]
-    print(hist_data)
     # make distribution plot object
-    fig = ff.create_distplot(hist_data, labels, bin_size=2, show_curve=False)
+    fig = ff.create_distplot(hist_data, labels, bin_size=bin_size, show_curve=False)
     return fig
 
 
