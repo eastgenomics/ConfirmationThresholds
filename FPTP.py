@@ -7,18 +7,13 @@ Author: Chris Pyatt
 
 # import libraries
 import argparse
-from cgitb import html
 import re
 import sys
-import vcf
+import math
 import numpy as np
-import chart_studio.plotly as py
 import plotly.figure_factory as ff
-import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import gzip
-import math
-from IPython.display import HTML
 
 
 # global variables
