@@ -7,6 +7,7 @@ Author: Chris Pyatt
 
 # import libraries
 import argparse
+from cgitb import html
 import re
 import sys
 import vcf
@@ -393,16 +394,42 @@ def get_output_name(files, happy=True):
     return output
 
 
-def make_report(plots, outFile):
+def make_html(plots):
     '''
     Given a list of plot objects, construct an html report and save to file?
     Output name constructed from input filenames.
     '''
-    pass
-    #for plot_obj in plots:
-    #    plot_url = py.plot(plot_obj, filename='plot_object', auto_open=False,)
-    #    print(plot_url)
-    #return
+    css = 'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css'
+    html_string = (
+                    f'<html><head><link rel="stylesheet" href="{css}">\
+                    <style>body{{ margin:0 100; background:whitesmoke; }}\
+                    </style></head><body>'
+                )
+    for i in plots:
+        html_string = html_string + '<h2>Section 1: Apple Inc. (AAPL) stock in 2014</h2>'
+        html_string = html_string + (
+                        f'<iframe width="1000" height="550" frameborder="0" \
+                        seamless="seamless" scrolling="no" \
+                        src="{i}.embed?width=800&height=550"></iframe>'
+                       )
+    html_string = html_string + '</body></html>'
+    return html_string
+
+
+def make_report(html_string, outfile):
+    '''
+    Take html string (output of make_html) and save to output file
+    '''
+    try:
+        with open(outfile, 'w') as out:
+            out.write(html_string)
+        return 0
+    except Exception as error:
+        print(
+            '\nError saving output to html file.'
+            f'Error: {error}'
+            )
+        sys.exit(1)
 
 
 def merge_happy_query(happy, query):
@@ -447,8 +474,6 @@ def make_arrays(data, metric, fptp, snp_indel=None, hethom=None):
     sample2) of relevant metric values for plotting, split according to
     category (SNP/INDEL, het/hom).
     '''
-    print(len(data))
-    print(metric, fptp, snp_indel, hethom)
     array1 = [fptp[0]]
     array2 = [fptp[1]]
     if snp_indel:
@@ -484,14 +509,11 @@ def make_arrays(data, metric, fptp, snp_indel=None, hethom=None):
             array1.append(float(data[item][metric]))
         except KeyError:
             pass
-    print(len(filtered_keys_1))
-    print(filtered_keys_2)
     for item in filtered_keys_2:
         try:
             array2.append(float(data[item][metric]))
         except KeyError:
             pass
-    print(array2)
     return [array1, array2]
 
 
@@ -547,22 +569,6 @@ def make_tiled_figure(subfigs, metric):
     return fig
 
 
-def make_html(fig):
-    '''
-    Temporary function to help me visualise the output before making a proper html file.
-    '''
-    import dash
-    from dash import dcc
-    from dash import html
-
-    app = dash.Dash()
-    app.layout = html.Div([
-        dcc.Graph(figure=fig)
-    ])
-
-    app.run_server(debug=True, use_reloader=False)  # Turn off reloader if inside Jupyter
-
-
 def main():
     '''
     Main app code calling other functions.
@@ -579,10 +585,7 @@ def main():
         sample1 = parse_happy(args.happy)
         sample2 = parse_query(args.query[0])
         # merge input dicts
-        print(f'Length of happy dict: {len(sample1)}')
-        print(f'Length of query dict: {len(sample2)}')
         merged_data = merge_happy_query(sample1, sample2)
-        print(f'Length of merged dict: {len(merged_data)}')
         # make 4 arrays for snp, indel, het, hom plots, for each metric & make plot objects
         plots = make_plots(merged_data, metrics)
     else:
@@ -605,15 +608,9 @@ def main():
     else:
         output = get_output_name(args.query, False)
 
-    # for each metric in plots list, add to report ????????
-    make_report(plots, output)
-
-    print(f'Type of plots: {type(plots)}')
-    make_html(plots[-2])
-
-    #for i in plots:
-    #    print(f'Type of individual: {type(i)}')
-    #    make_html(i)
+    # for each metric in plots list, add to report
+    html_output = make_html(plots)
+    make_report(html_output, output)
 
 
 if __name__ == "__main__":
