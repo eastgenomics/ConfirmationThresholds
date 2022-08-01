@@ -127,3 +127,10 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# VCF test files
+*.vcf
+*.vcf.gz
+
+# HTML output
+*.html
