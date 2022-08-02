@@ -11,10 +11,11 @@ import re
 import sys
 import math
 import numpy as np
-#import chart_studio.plotly.offline as py
+import pandas as pd
 import plotly.io as pio
-import plotly.offline as py
+import plotly.express as px
 import plotly.figure_factory as ff
+import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import gzip
 
@@ -342,7 +343,7 @@ def parse_happy(happy):
 def decide_bins(array):
     '''
     Take numpy array & use number and range of values to determine
-    appropriate bin size for histopgram. Returns bin size as integer.
+    appropriate bin number for histopgram.
     '''
     array_length = len(array)
     array_range = max(array) - min(array)
@@ -350,6 +351,7 @@ def decide_bins(array):
     num_bins = (1 + 3.322 * math.log10(array_length)) * 3
     # Divide the range of values by the number of bins to get bin size
     bin_size = array_range / num_bins
+    #return round(num_bins)
     return bin_size
 
 
@@ -364,13 +366,20 @@ def create_plot(array1, array2, name):
         # do something to indicate insufficient data for this metric combo??
         return None
     # decide bin sizes based on array1 (should be TPs so the longer dataset)
-    bin_size = decide_bins(array1)
+    bins = decide_bins(array1)
     # convert arrays to dataframe with column headers
     hist_data = [np.array(array1), np.array(array2)]
+    #df1 = pd.DataFrame(array1, columns=[labels[0]])
+    #df2 = pd.DataFrame(array2, columns=[labels[1]])
+    #df = pd.concat([df1, df2], ignore_index=True, axis=1)
+    #df.rename(columns={0:labels[0],1:labels[1]})
     # make distribution plot object - no curves as gets broken by symmetrical
     # matrix (all values the same in this case)
+    #fig = go.Figure()
+    #fig.add_trace(go.Histogram(histfunc='count', x=array1))#, nbins=bins, labels={'0':labels[0], '1':labels[1]}, barmode="overlay", histnorm='percent', title=name))
+    #fig.add_trace(go.Histogram(histfunc='count', x=array2))
     fig = ff.create_distplot(
-                             hist_data, labels, bin_size=bin_size,
+                             hist_data, labels, bin_size=bins,
                              colors=colours, show_curve=False
                              )
     return fig
@@ -566,6 +575,7 @@ def make_tiled_figure(subfigs, metric):
             col_val = 2
         if subfig:
             fig.add_trace(subfig.data[0], row=row_val, col=col_val)
+            fig.add_trace(subfig.data[1], row=row_val, col=col_val)
     # specify plot size and title
     fig.update_layout(height=1000, width=1000, title_text=metric)
     return fig
