@@ -11,6 +11,9 @@ import re
 import sys
 import math
 import numpy as np
+#import chart_studio.plotly.offline as py
+import plotly.io as pio
+import plotly.offline as py
 import plotly.figure_factory as ff
 from plotly.subplots import make_subplots
 import gzip
@@ -398,15 +401,19 @@ def make_html(plots):
     html_string = (
                     f'<html><head><link rel="stylesheet" href="{css}">\
                     <style>body{{ margin:0 100; background:whitesmoke; }}\
-                    </style></head><body>'
+                    </style><script src="https://cdn.plot.ly/plotly-2.12.1.min.js"></script></head><body>'
                 )
     for i in plots:
+        metric = i['layout']['title']['text']
+        plot_div = pio.to_html(i, full_html=False, include_plotlyjs='cdn')
+        #plot_url = py.plot(i, auto_open=False, filename=f'{metric}.html')
         html_string = html_string + '<h2>Section 1: Apple Inc. (AAPL) stock in 2014</h2>'
-        html_string = html_string + (
-                        f'<iframe width="1000" height="550" frameborder="0" \
-                        seamless="seamless" scrolling="no" \
-                        src="{i}.embed?width=800&height=550"></iframe>'
-                       )
+        html_string = html_string + plot_div
+        #html_string = html_string + (
+        #                f'<iframe width="1000" height="1000" frameborder="0" \
+        #                seamless="seamless" scrolling="no" \
+        #                src="{plot_div}"></iframe>'
+        #               )
     html_string = html_string + '</body></html>'
     return html_string
 
