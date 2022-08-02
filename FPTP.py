@@ -360,15 +360,22 @@ def create_plot(array1, array2, name):
     Given two arrays of metric values, plot corresponding distributions and
     return plot object. Name variable to be title of plot?
     '''
-    labels = [array1.pop(0), array2.pop(0)]
-    colours = ['#eb8909', '#09ebeb']
-    if len(array1) < 1 or len(array2) < 1:
+    labels = [f'{name}_{array1.pop(0)}', f'{name}_{array2.pop(0)}']
+    colours = ['#eb8909', '#4287f5']
+    if len(array1) < 1 and len(array2) < 1:
         # do something to indicate insufficient data for this metric combo??
         return None
     # decide bin sizes based on array1 (should be TPs so the longer dataset)
     bins = decide_bins(array1)
     # convert arrays to dataframe with column headers
-    hist_data = [np.array(array1), np.array(array2)]
+    if not array1:
+        hist_data = [np.array(array2)]
+        labels = [labels[1]]
+    elif not array2:
+        hist_data = [np.array(array1)]
+        labels = [labels[0]]
+    else:
+        hist_data = [np.array(array1), np.array(array2)]
     #df1 = pd.DataFrame(array1, columns=[labels[0]])
     #df2 = pd.DataFrame(array2, columns=[labels[1]])
     #df = pd.concat([df1, df2], ignore_index=True, axis=1)
@@ -574,8 +581,8 @@ def make_tiled_figure(subfigs, metric):
         else:
             col_val = 2
         if subfig:
-            fig.add_trace(subfig.data[0], row=row_val, col=col_val)
-            fig.add_trace(subfig.data[1], row=row_val, col=col_val)
+            for trace in subfig.data:
+                fig.add_trace(trace, row=row_val, col=col_val)
     # specify plot size and title
     fig.update_layout(height=1000, width=1000, title_text=metric)
     return fig
