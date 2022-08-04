@@ -12,6 +12,7 @@ import sys
 import math
 import numpy as np
 import pandas as pd
+import scipy.stats as st
 import plotly.io as pio
 import plotly.express as px
 import plotly.figure_factory as ff
@@ -355,12 +356,29 @@ def decide_bins(array):
     return bin_size
 
 
+def calculate_centiles(array):
+    '''
+    Take array/list of numbers & return an array of equal length representing
+    centiles for each value in the input list.
+    '''
+    centiles = []
+    for i in array:
+        centile = st.percentileofscore(array, i)
+        centiles.append(centile)
+    return np.array(centiles)
+
+
 def create_plot(array1, array2, name):
     '''
     Given two arrays of metric values, plot corresponding distributions and
     return plot object. Name variable to be title of plot?
     '''
-    labels = [f'{name}_{array1.pop(0)}', f'{name}_{array2.pop(0)}']
+    label1 = array1.pop(0)
+    label2 = array2.pop(0)
+    # calculate centiles for each entry in the arrays (displayed silently)
+    c_array1 = calculate_centiles(array1)
+    c_array2 = calculate_centiles(array2)
+    labels = [f'{name}_{label1}', f'{name}_{label2}']
     colours = ['#eb8909', '#4287f5']
     if len(array1) < 1 and len(array2) < 1:
         # do something to indicate insufficient data for this metric combo??
@@ -376,20 +394,48 @@ def create_plot(array1, array2, name):
         labels = [labels[0]]
     else:
         hist_data = [np.array(array1), np.array(array2)]
-    #df1 = pd.DataFrame(array1, columns=[labels[0]])
-    #df2 = pd.DataFrame(array2, columns=[labels[1]])
-    #df = pd.concat([df1, df2], ignore_index=True, axis=1)
-    #df.rename(columns={0:labels[0],1:labels[1]})
     # make distribution plot object - no curves as gets broken by symmetrical
     # matrix (all values the same in this case)
-    #fig = go.Figure()
-    #fig.add_trace(go.Histogram(histfunc='count', x=array1))#, nbins=bins, labels={'0':labels[0], '1':labels[1]}, barmode="overlay", histnorm='percent', title=name))
-    #fig.add_trace(go.Histogram(histfunc='count', x=array2))
-    fig = ff.create_distplot(
+    fig = go.Figure()
+    trace = ff.create_distplot(
                              hist_data, labels, bin_size=bins,
-                             colors=colours, show_curve=False
+                             colors=colours, show_curve=False,
+                             show_rug=False
                              )
+    for i in trace.data:
+        fig.add_trace(i)
+    # add centile traces
+    if not array1:
+        fig.add_trace(go.Scatter(x=hist_data[0], y=c_array2, showlegend=False, visible='legendonly'))
+    elif not array2:
+        fig.add_trace(go.Scatter(x=hist_data[0], y=c_array1, showlegend=False, visible='legendonly'))
+    else:
+        fig.add_trace(go.Scatter(x=hist_data[0], y=c_array1, showlegend=False, visible='legendonly'))
+        fig.add_trace(go.Scatter(x=hist_data[1], y=c_array2, showlegend=False, visible='legendonly'))
     return fig
+
+
+def calculate_threshold_counts(TParray, FParray, threshold):
+    '''
+    Takes arrays of TP and FP metric values, and a user-generated threshold.
+    Returns counts of variants on either side of that threshold. Points equal
+    to the threshold are arbitrarily called as above it.
+    '''
+    TP_above = 0
+    TP_below = 0
+    FP_above = 0
+    FP_below = 0
+    for i in TParray:
+        if i >= threshold:
+            TP_above += 1
+        else:
+            TP_below += 1
+    for i in FParray:
+        if i >= threshold:
+            FP_above += 1
+        else:
+            FP_below += 1
+    return [TP_above, TP_below, FP_above, FP_below]
 
 
 def get_output_name(files, happy=True):
@@ -422,14 +468,9 @@ def make_html(plots):
     for i in plots:
         metric = i['layout']['title']['text']
         plot_div = pio.to_html(i, full_html=False, include_plotlyjs='cdn')
-        #plot_url = py.plot(i, auto_open=False, filename=f'{metric}.html')
-        html_string = html_string + '<h2>Section 1: Apple Inc. (AAPL) stock in 2014</h2>'
+        html_string = html_string + f'<h2>True & False Positive - {metric}. Hover over to see histogram bins and SNP/INDEL, HET/HOM labels</h2>'
         html_string = html_string + plot_div
-        #html_string = html_string + (
-        #                f'<iframe width="1000" height="1000" frameborder="0" \
-        #                seamless="seamless" scrolling="no" \
-        #                src="{plot_div}"></iframe>'
-        #               )
+
     html_string = html_string + '</body></html>'
     return html_string
 
@@ -569,23 +610,52 @@ def make_tiled_figure(subfigs, metric):
     Take list of figures ( figure factory plot objects) to be combined into
     tiled image. Return single figure object with tiled subplots.
     '''
-    fig = make_subplots(rows=2, cols=2)
+    fig = make_subplots(rows=1, cols=4, subplot_titles=[
+        'SNP', 'INDEL', 'HET', 'HOM'])
     # decide on position and add subfigures to plot
     for i, subfig in enumerate(subfigs):
-        if i in (1, 2):
-            row_val = 1
-        else:
-            row_val = 2
-        if i in (1, 3):
-            col_val = 1
-        else:
-            col_val = 2
         if subfig:
             for trace in subfig.data:
-                fig.add_trace(trace, row=row_val, col=col_val)
+                fig.add_trace(trace, row=1, col=i+1)
+                fig.update_layout(hovermode='x unified')
+                #fig.update_layout(subfig.layout)
     # specify plot size and title
-    fig.update_layout(height=1000, width=1000, title_text=metric)
+    fig.update_layout(height=500, width=1800, title_text=metric, showlegend=False)
     return fig
+
+
+def add_line_traces(fig):
+    # Add traces, one for each slider step
+    for step in np.arange(0, 5, 0.1):
+        fig.add_trace(
+            go.Scatter(
+                visible=False,
+                line=dict(color="#00CED1", width=6),
+                name="𝜈 = " + str(step),
+                x=np.arange(0, 10, 0.01),
+                y=np.sin(step * np.arange(0, 10, 0.01))))
+    # Make 10th trace visible
+    fig.data[10].visible = True
+
+
+def add_sliders(fig):
+    # Create and add slider
+    steps = []
+    for i in range(len(fig.data)):
+        step = dict(
+            method="update",
+            args=[{"visible": [False] * len(fig.data)},
+                {"title": "Slider switched to step: " + str(i)}],  # layout attribute
+        )
+        step["args"][0]["visible"][i] = True  # Toggle i'th trace to "visible"
+        steps.append(step)
+    sliders = [dict(
+        active=10,
+        currentvalue={"prefix": "Frequency: "},
+        pad={"t": 50},
+        steps=steps
+    )]
+    fig.update_layout(sliders=sliders)
 
 
 def main():
