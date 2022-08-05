@@ -375,9 +375,16 @@ def create_plot(array1, array2, name):
     '''
     label1 = array1.pop(0)
     label2 = array2.pop(0)
+    # make combined df column
+    values = array1 + array2
     # calculate centiles for each entry in the arrays (displayed silently)
-    c_array1 = calculate_centiles(array1)
-    c_array2 = calculate_centiles(array2)
+    # and turn into column for dataframe (same order as values)
+    centiles = list(calculate_centiles(array1)) + list(calculate_centiles(array2))
+    # make TPFP column for dataframe
+    TPFP = ([label1] * len(array1)) + ([label2] * len(array2))
+    # make dataframe
+    df = pd.DataFrame({'values':values,'TPFP':TPFP,'centiles':centiles})
+    # make metadata
     labels = [f'{name}_{label1}', f'{name}_{label2}']
     colours = ['#eb8909', '#4287f5']
     if len(array1) < 1 and len(array2) < 1:
@@ -405,37 +412,14 @@ def create_plot(array1, array2, name):
     for i in trace.data:
         fig.add_trace(i)
     # add centile traces
-    if not array1:
-        fig.add_trace(go.Scatter(x=hist_data[0], y=c_array2, showlegend=False, visible='legendonly'))
-    elif not array2:
-        fig.add_trace(go.Scatter(x=hist_data[0], y=c_array1, showlegend=False, visible='legendonly'))
-    else:
-        fig.add_trace(go.Scatter(x=hist_data[0], y=c_array1, showlegend=False, visible='legendonly'))
-        fig.add_trace(go.Scatter(x=hist_data[1], y=c_array2, showlegend=False, visible='legendonly'))
+    #if not array1:
+    #    fig.add_trace(go.Scatter(x=hist_data[0], y=c_array2, showlegend=False, visible='legendonly'))
+    #elif not array2:
+    #    fig.add_trace(go.Scatter(x=hist_data[0], y=c_array1, showlegend=False, visible='legendonly'))
+    #else:
+    #    fig.add_trace(go.Scatter(x=hist_data[0], y=c_array1, showlegend=False, visible='legendonly'))
+    #    fig.add_trace(go.Scatter(x=hist_data[1], y=c_array2, showlegend=False, visible='legendonly'))
     return fig
-
-
-def calculate_threshold_counts(TParray, FParray, threshold):
-    '''
-    Takes arrays of TP and FP metric values, and a user-generated threshold.
-    Returns counts of variants on either side of that threshold. Points equal
-    to the threshold are arbitrarily called as above it.
-    '''
-    TP_above = 0
-    TP_below = 0
-    FP_above = 0
-    FP_below = 0
-    for i in TParray:
-        if i >= threshold:
-            TP_above += 1
-        else:
-            TP_below += 1
-    for i in FParray:
-        if i >= threshold:
-            FP_above += 1
-        else:
-            FP_below += 1
-    return [TP_above, TP_below, FP_above, FP_below]
 
 
 def get_output_name(files, happy=True):
@@ -622,40 +606,6 @@ def make_tiled_figure(subfigs, metric):
     # specify plot size and title
     fig.update_layout(height=500, width=1800, title_text=metric, showlegend=False)
     return fig
-
-
-def add_line_traces(fig):
-    # Add traces, one for each slider step
-    for step in np.arange(0, 5, 0.1):
-        fig.add_trace(
-            go.Scatter(
-                visible=False,
-                line=dict(color="#00CED1", width=6),
-                name="𝜈 = " + str(step),
-                x=np.arange(0, 10, 0.01),
-                y=np.sin(step * np.arange(0, 10, 0.01))))
-    # Make 10th trace visible
-    fig.data[10].visible = True
-
-
-def add_sliders(fig):
-    # Create and add slider
-    steps = []
-    for i in range(len(fig.data)):
-        step = dict(
-            method="update",
-            args=[{"visible": [False] * len(fig.data)},
-                {"title": "Slider switched to step: " + str(i)}],  # layout attribute
-        )
-        step["args"][0]["visible"][i] = True  # Toggle i'th trace to "visible"
-        steps.append(step)
-    sliders = [dict(
-        active=10,
-        currentvalue={"prefix": "Frequency: "},
-        pad={"t": 50},
-        steps=steps
-    )]
-    fig.update_layout(sliders=sliders)
 
 
 def main():
