@@ -384,6 +384,8 @@ def create_plot(array1, array2, name):
     TPFP = ([label1] * len(array1)) + ([label2] * len(array2))
     # make dataframe
     df = pd.DataFrame({'values':values,'TPFP':TPFP,'centiles':centiles})
+    #fig = px.histogram(df, x='values', color='TPFP', hover_data={'centiles':True})
+    #fig.update_traces(hovertemplate="<br>".join(["Value: %{x}","Counts: %{y}","Centile: %{hoverdata[0]}",]))
     # make metadata
     labels = [f'{name}_{label1}', f'{name}_{label2}']
     colours = ['#eb8909', '#4287f5']
