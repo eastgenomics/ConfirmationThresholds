@@ -384,35 +384,34 @@ def create_plot(array1, array2, name):
     TPFP = ([label1] * len(array1)) + ([label2] * len(array2))
     # make dataframe
     df = pd.DataFrame({'values':values,'TPFP':TPFP,'centiles':centiles})
-    #fig = px.histogram(df, x='values', color='TPFP', hover_data={'centiles':True})
-    #fig.update_traces(hovertemplate="<br>".join(["Value: %{x}","Counts: %{y}","Centile: %{hoverdata[0]}",]))
+    fig = px.histogram(df, x='values', color='TPFP', hover_data=df.columns, marginal='rug', barmode='overlay')
     # make metadata
-    labels = [f'{name}_{label1}', f'{name}_{label2}']
-    colours = ['#eb8909', '#4287f5']
+    #labels = [f'{name}_{label1}', f'{name}_{label2}']
+    #colours = ['#eb8909', '#4287f5']
     if len(array1) < 1 and len(array2) < 1:
         # do something to indicate insufficient data for this metric combo??
         return None
     # decide bin sizes based on array1 (should be TPs so the longer dataset)
-    bins = decide_bins(array1)
+    #bins = decide_bins(array1)
     # convert arrays to dataframe with column headers
-    if not array1:
-        hist_data = [np.array(array2)]
-        labels = [labels[1]]
-    elif not array2:
-        hist_data = [np.array(array1)]
-        labels = [labels[0]]
-    else:
-        hist_data = [np.array(array1), np.array(array2)]
+    #if not array1:
+    #    hist_data = [np.array(array2)]
+    #    labels = [labels[1]]
+    #elif not array2:
+    #    hist_data = [np.array(array1)]
+    #    labels = [labels[0]]
+    #else:
+    #    hist_data = [np.array(array1), np.array(array2)]
     # make distribution plot object - no curves as gets broken by symmetrical
     # matrix (all values the same in this case)
-    fig = go.Figure()
-    trace = ff.create_distplot(
-                             hist_data, labels, bin_size=bins,
-                             colors=colours, show_curve=False,
-                             show_rug=False
-                             )
-    for i in trace.data:
-        fig.add_trace(i)
+    #fig = go.Figure()
+    #trace = ff.create_distplot(
+    #                         hist_data, labels, bin_size=bins,
+    #                         colors=colours, show_curve=False,
+    #                         show_rug=False
+    #                         )
+    #for i in trace.data:
+    #    fig.add_trace(i)
     # add centile traces
     #if not array1:
     #    fig.add_trace(go.Scatter(x=hist_data[0], y=c_array2, showlegend=False, visible='legendonly'))
