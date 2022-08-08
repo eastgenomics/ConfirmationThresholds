@@ -391,7 +391,7 @@ def create_plot(array1, array2, name):
         if i % 2 == 0:
             trace['hovertemplate'] = f'TPFP={group}<br>Bin=%{{x}}<extra></extra>'
         else:
-            trace['hovertemplate'] = '<br>Metric value=%{x}<br>Centile=%{customdata[0]}<extra></extra>'
+            trace['hovertemplate'] = '<br>Metric value=%{x}<br>Centile=%{customdata[0]}<br><extra></extra>'
     # make metadata
     #labels = [f'{name}_{label1}', f'{name}_{label2}']
     #colours = ['#eb8909', '#4287f5']
