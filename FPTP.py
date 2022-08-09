@@ -340,7 +340,6 @@ def parse_happy(happy):
             # take only alt #1 (should only be one anyway)
             alt = str(record.ALT[0])
             variant = (f'{chrom}_{pos}_{ref}_{alt}')
-            vcf_format = record.FORMAT.split(':')
             # assume query is second sample (should be)
             vcf_sample = record.samples[1]
             cat_dict = {}
@@ -379,7 +378,7 @@ def calculate_centiles(array):
     '''
     centiles = []
     for i in array:
-        centile = st.percentileofscore(array, i)
+        centile = round(st.percentileofscore(array, i), 2)
         centiles.append(centile)
     return np.array(centiles)
 
