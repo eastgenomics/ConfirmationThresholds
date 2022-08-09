@@ -37,33 +37,33 @@ def get_args():
     parser.add_argument(
         '--happy',
         help=(
-            'filename of hap.py VCF (containing variants and TP/FP calls). \
-                Gzipped.'
+            'filename of hap.py VCF (containing variants and TP/FP calls). '
+            'Gzipped.'
         )
     )
     parser.add_argument(
         '--verbose', action='store_true',
         help=(
-            'if enabled, reports which requested metrics are not available \
-                in query vcf'
+            'if enabled, reports which requested metrics are not available '
+            'in query vcf'
         )
     )
     parser.add_argument(
         '--query', required=True,
         help=(
-            'filename of query VCF (containing variants and metric values). \
-                Gzipped. Up to two query sample VCFs may be provided, but if \
-                    a hap.py VCF is provided via the --happy option, only one \
-                        (matching) query VCF will be accepted. Input data \
-                            must be normalised VCF.'
+            'filename of query VCF (containing variants and metric values). '
+            'Gzipped. Up to two query sample VCFs may be provided, but if '
+            'a hap.py VCF is provided via the --happy option, only one '
+            '(matching) query VCF will be accepted. Input data '
+            'must be normalised VCF.'
         )
     )
     parser.add_argument(
         '--metrics', default='all',
         help=(
-            'list of metrics to be plotted. The list must be comma-separated \
-                with no spaces. By default, all metrics found in the VCF will \
-                    be plotted.'
+            'list of metrics to be plotted. The list must be comma-separated '
+            'with no spaces. By default, all metrics found in the VCF will '
+            'be plotted.'
         )
     )
     args = parser.parse_args()
@@ -91,8 +91,8 @@ def get_args():
 
 def get_sample_names(sample1, sample2):
     '''
-    Takes two input files (should be in the format \
-    samplename-some-metadata-fields.vcf.gz) and returns just \
+    Takes two input files (should be in the format
+    samplename-some-metadata-fields.vcf.gz) and returns just
     the sample names as global variables
     '''
     try:
@@ -103,8 +103,8 @@ def get_sample_names(sample1, sample2):
         SAMPLE2_NAME = re.split('[.-]', sample2)[0]
     except Exception as error:
         print(
-            f'One of {sample1} or {sample2} does not match the expected \
-                pattern. Expected something like samplename-metadata.vcf.gz'
+            f'One of {sample1} or {sample2} does not match the expected '
+            'pattern. Expected something like samplename-metadata.vcf.gz'
             f'Error: {error}'
             )
         sys.exit(1)
@@ -116,8 +116,10 @@ def check_happy_query_match(happy, query):
     (as variants will need to be matched between the two to assign TP/FP)
     '''
     if happy:
-        assert happy == query, f'hap.py and query vcf sample names do not \
-            match ({happy} & {query})'
+        assert happy == query, (
+            'hap.py and query vcf sample names do not '
+            f'match ({happy} & {query})'
+            )
     else:
         return True
 
@@ -157,16 +159,39 @@ def check_metrics(query, metrics):
             )
         sys.exit(1)
     try:
+        fh = gzip.open(query, 'rt')
+        fh.close
+    except RuntimeError as error:
+        print(f'File {query} doesn\'t appear to be gzipped.')
+        print(error)
+        sys.exit(1)
+    try:
         with gzip.open(query, 'rt') as file:
             all_info_metrics = []
             all_format_metrics = []
-            # parse out metric names - separate info and format metrics in case of identical names (usually DP)
+            # parse out metric names - separate info and format metrics in
+            # case of identical names (usually DP)
             for line in file:
-                # grab only metrics where the type is float or integer (as others cannot be plotted) and also where the number of values is constrained to 1. The latter constraint will be modified to accept lists of values in later versions of this tool.
-                if line.startswith('##INFO') and ('Integer' in line.split(',')[2] or 'Float' in line.split(',')[2]) and line.split(',')[1] == 'Number=1':
+                # grab only metrics where the type is float or integer (as
+                # others cannot be plotted) and also where the number of values
+                # is constrained to 1. The latter constraint will be modified
+                # to accept lists of values in later versions of this tool.
+                if (
+                    line.startswith('##INFO') and
+                    ('Integer' in line.split(',')[2] or
+                     'Float' in line.split(',')[2]) and
+                    line.split(',')[1] == 'Number=1'
+                     ):
                     all_info_metrics.append(line.split(',')[0].split('=')[-1])
-                elif line.startswith('##FORMAT') and ('Integer' in line.split(',')[2] or 'Float' in line.split(',')[2]) and line.split(',')[1] == 'Number=1':
-                    all_format_metrics.append(line.split(',')[0].split('=')[-1])
+                elif (
+                    line.startswith('##FORMAT') and
+                    ('Integer' in line.split(',')[2] or
+                     'Float' in line.split(',')[2]) and
+                    line.split(',')[1] == 'Number=1'
+                      ):
+                    all_format_metrics.append(
+                        line.split(',')[0].split('=')[-1]
+                        )
                 elif line.startswith('#CHROM'):
                     break
     except Exception as error:
@@ -194,16 +219,14 @@ def check_metrics(query, metrics):
             )
         unavailable_metrics = [unavailable_info_metrics,
                                unavailable_format_metrics]
-    # add prefixes to metrics list to distinguish duplicate metric names in \
+    # add prefixes to metrics list to distinguish duplicate metric names in
     # INFO and FORMAT fields
     available_metrics = []
-    for metric in available_info_metrics:
-        available_metrics.append(f'info_{metric}')
-    for metric in available_format_metrics:
-        available_metrics.append(f'format_{metric}')
+    available_metrics.extend(f'info_{x}' for x in available_info_metrics)
+    available_metrics.extend(f'format_{x}' for x in available_format_metrics)
     if VERBOSE:
-        print(f'\nThe metrics below were requested but not present in the \
-            query VCF ({query}).\n' + str(unavailable_metrics))
+        print('\nThe metrics below were requested but not present in the '
+              f'query VCF ({query}).\n' + str(unavailable_metrics))
     return available_metrics
 
 
@@ -212,6 +235,13 @@ def parse_query(query, happy=True):
     Takes a query vcf filename. Returns a dictionary of relevant metrics and
     values, paired to variants.
     '''
+    try:
+        fh = gzip.open(query, 'rt')
+        fh.close
+    except RuntimeError as error:
+        print(f'File {query} doesn\'t appear to be gzipped.')
+        print(error)
+        sys.exit(1)
     try:
         with gzip.open(query, 'rt') as file:
             variant_dict = {}
@@ -271,7 +301,7 @@ def infer_het_hom(genotype):
     elif genotype == '1/1':
         hethom = 'homalt'
     else:
-        # not sure whether exiting at this point is best given could be one of\
+        # not sure whether exiting at this point is best given could be one of
         # thousands - maybe save as N/A and deal with it elsewhere?
         print(
             f'Genotype {genotype} not recognised. Het/hom cannot be inferred.'
@@ -287,8 +317,8 @@ def infer_snp_indel(ref, alt):
     '''
     if ',' in alt:
         print(
-            f'Comma present in alt field ({alt}), suggesting non-normalised \
-            VCF. Please provide normalised VCF data.'
+            f'Comma present in alt field ({alt}), suggesting non-normalised '
+            'VCF. Please provide normalised VCF data.'
             )
         sys.exit(1)
     elif len(ref) == 1 or len(alt) == 1:
@@ -304,10 +334,17 @@ def parse_happy(happy):
     of variants paired with TP/FP, SNP/INDEL, & het/hom status.
     '''
     try:
+        fh = gzip.open(happy, 'rt')
+        fh.close
+    except RuntimeError as error:
+        print(f'File {happy} doesn\'t appear to be gzipped.')
+        print(error)
+        sys.exit(1)
+    try:
         with gzip.open(happy, 'rt') as file:
             variant_dict = {}
             for line in file:
-                # ignores other info in file e.g. 'CALL_WEIGHT', 'Genotype', \
+                # ignores other info in file e.g. 'CALL_WEIGHT', 'Genotype',
                 # 'variant quality for ROC creation', etc.
                 cat_dict = {}
                 if not line.startswith('#'):
@@ -351,6 +388,7 @@ def create_plot(array1, array2, name):
     return plot object. Name variable to be title of plot?
     '''
     labels = [array1.pop(0), array2.pop(0)]
+    colours = ['#eb8909', '#09ebeb']
     if len(array1) < 1 or len(array2) < 1:
         # do something to indicate insufficient data for this metric combo??
         return None
@@ -359,7 +397,10 @@ def create_plot(array1, array2, name):
     # convert arrays to dataframe with column headers
     hist_data = [np.array(array1), np.array(array2)]
     # make distribution plot object
-    fig = ff.create_distplot(hist_data, labels, bin_size=bin_size, show_curve=False)
+    fig = ff.create_distplot(
+                             hist_data, labels, bin_size=bin_size,
+                             colors=colours, show_curve=False
+                             )
     return fig
 
 
@@ -406,8 +447,8 @@ def merge_happy_query(happy, query):
             missing_variants.append(variant)
     if VERBOSE:
         print(
-            f'\nThe variants below were present in the hap.py VCF but not the \
-                query VCF:\n {str(missing_variants)}'
+              '\nThe variants below were present in the hap.py VCF but not '
+              f'the query VCF:\n {str(missing_variants)}'
             )
     return merged_dict
 
@@ -461,8 +502,8 @@ def make_arrays(data, metric, fptp, snp_indel=None, hethom=None):
             [k for k, v in data.items() if v['TPFP_or_samplename'] == fptp[1]]
         )
     for item in filtered_keys_1:
-        # try to append metric value to array but catch occurrences where \
-        # metric is not present for that variant (usually metrics like \
+        # try to append metric value to array but catch occurrences where
+        # metric is not present for that variant (usually metrics like
         # BaseQRankSum, ClippingRankSum, ExcessHet, etc.)
         try:
             array1.append(float(data[item][metric]))
@@ -561,7 +602,8 @@ def main():
         sample2 = parse_query(args.query[0])
         # merge input dicts
         merged_data = merge_happy_query(sample1, sample2)
-        # make 4 arrays for snp, indel, het, hom plots, for each metric & make plot objects
+        # make 4 arrays for snp, indel, het, hom plots, for each metric &
+        # make plot objects
         plots = make_plots(merged_data, metrics)
     else:
         get_sample_names(args.query[0], args.query[1])
