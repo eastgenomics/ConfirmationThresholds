@@ -239,13 +239,6 @@ def parse_query(query, happy=True):
     metrics and values, paired to variants.
     '''
     try:
-        fh = gzip.open(query, 'rt')
-        fh.close
-    except RuntimeError as error:
-        print(f'File {query} doesn\'t appear to be gzipped.')
-        print(error)
-        sys.exit(1)
-    try:
         vcf_reader = vcf.Reader(filename=query)
         variant_dict = {}
         for record in vcf_reader:
@@ -317,6 +310,7 @@ def infer_snp_indel(ref, alt):
     '''
     Take ref & alt fields, return SNP or INDEL label. Input VCF must be
     normalised for this method to work (i.e. one variant per position).
+    Possibly redundant as pyvcf has is_SNP or is_Indel methods?
     '''
     if ',' in alt:
         print(
@@ -337,39 +331,23 @@ def parse_happy(happy):
     of variants paired with TP/FP, SNP/INDEL, & het/hom status.
     '''
     try:
-        fh = gzip.open(happy, 'rt')
-        fh.close
-    except RuntimeError as error:
-        print(f'File {happy} doesn\'t appear to be gzipped.')
-        print(error)
-        sys.exit(1)
-    try:
-        with gzip.open(happy, 'rt') as file:
-            variant_dict = {}
-            for line in file:
-                # ignores other info in file e.g. 'CALL_WEIGHT', 'Genotype', \
-                # 'variant quality for ROC creation', etc.
-                cat_dict = {}
-                if not line.startswith('#'):
-                    chrom = line.split('\t')[0]
-                    pos = line.split('\t')[1]
-                    ref = line.split('\t')[3]
-                    alt = line.split('\t')[4]
-                    variant = (f'{chrom}_{pos}_{ref}_{alt}')
-                    query_format = line.split('\t')[8].split(':')
-                    query_values = line.rstrip().split('\t')[10].split(':')
-                    # add format/query metrics to dictionary (format varies)
-                    # so can't rely on simple string splitting
-                    query_dict = {}
-                    for i, metric in enumerate(query_format):
-                        value = query_values[i]
-                        query_dict[metric] = value
-                    cat_dict['TPFP_or_samplename'] = query_dict['BD']
-                    cat_dict['snp_indel'] = query_dict['BVT']
-                    cat_dict['HETHOM'] = query_dict['BLT']
-                else:
-                    continue
-                variant_dict[variant] = cat_dict
+        vcf_reader = vcf.Reader(filename=happy)
+        variant_dict = {}
+        for record in vcf_reader:
+            chrom = str(record.CHROM)
+            pos = str(record.POS)
+            ref = str(record.REF)
+            # take only alt #1 (should only be one anyway)
+            alt = str(record.ALT[0])
+            variant = (f'{chrom}_{pos}_{ref}_{alt}')
+            vcf_format = record.FORMAT.split(':')
+            # assume query is second sample (should be)
+            vcf_sample = record.samples[1]
+            cat_dict = {}
+            cat_dict['TPFP_or_samplename'] = vcf_sample['BD']
+            cat_dict['snp_indel'] = vcf_sample['BVT']
+            cat_dict['HETHOM'] = vcf_sample['BLT']
+            variant_dict[variant] = cat_dict
     except Exception as error:
         print(
             '\nError parsing happy VCF. Please check format.'
