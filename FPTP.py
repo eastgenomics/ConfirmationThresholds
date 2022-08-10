@@ -16,7 +16,6 @@ import scipy.stats as st
 import plotly.io as pio
 import plotly.express as px
 from plotly.subplots import make_subplots
-import gzip
 import vcf
 
 
@@ -160,43 +159,23 @@ def check_metrics(query, metrics):
             )
         sys.exit(1)
     try:
-        fh = gzip.open(query, 'rt')
-        fh.close
-    except RuntimeError as error:
-        print(f'File {query} doesn\'t appear to be gzipped.\n')
-        print(error)
-        sys.exit(1)
-    try:
-        with gzip.open(query, 'rt') as file:
-            all_info_metrics = []
-            all_format_metrics = []
-            # parse out metric names - separate info and format metrics in case
-            #  of identical names (usually DP)
-            for line in file:
-                # grab only metrics where the type is float or integer (as
-                # others cannot be plotted) and also where the number of values
-                # is constrained to 1. The latter constraint will be modified
-                # to accept lists of values in later versions of this tool.
-                if (
-                    line.startswith('##INFO') and
-                    (
-                     'Integer' in line.split(',')[2] or
-                     'Float' in line.split(',')[2]
-                     ) and line.split(',')[1] == 'Number=1'
-                        ):
-                    all_info_metrics.append(line.split(',')[0].split('=')[-1])
-                elif (
-                      line.startswith('##FORMAT') and
-                      (
-                       'Integer' in line.split(',')[2] or
-                       'Float' in line.split(',')[2]
-                       ) and line.split(',')[1] == 'Number=1'
-                        ):
-                    all_format_metrics.append(
-                        line.split(',')[0].split('=')[-1]
-                        )
-                elif line.startswith('#CHROM'):
-                    break
+        vcf_reader = vcf.Reader(filename=query)
+        # parse out metric names - separate info and format metrics in case
+        # of identical names (usually DP)
+        filtered_info_metrics = []
+        filtered_format_metrics = []
+        # grab only metrics where the type is float or integer (as
+        # others cannot be plotted) and also where the number of values
+        # is constrained to 1. The latter constraint will be modified
+        # to accept lists of values in later versions of this tool.
+        info_metrics = vcf_reader.infos
+        for i, j in info_metrics.items():
+            if j.type in ('Integer', 'Float') and j.num == 1:
+                filtered_info_metrics.append(i)
+        format_metrics = vcf_reader.formats
+        for i, j in format_metrics.items():
+            if j.type in ('Integer', 'Float') and j.num == 1:
+                filtered_format_metrics.append(i)
     except Exception as error:
         print(
             '\nError retreiving query VCF metrics. Please check format.\n'
@@ -204,21 +183,21 @@ def check_metrics(query, metrics):
             )
         sys.exit(1)
     if requested_metrics == 'all':
-        available_info_metrics = all_info_metrics
-        available_format_metrics = all_format_metrics
+        available_info_metrics = filtered_info_metrics
+        available_format_metrics = filtered_format_metrics
         unavailable_metrics = [[], []]
     else:
         available_info_metrics = list(
-            set(requested_metrics).intersection(all_info_metrics)
+            set(requested_metrics).intersection(filtered_info_metrics)
             )
         available_format_metrics = list(
-            set(requested_metrics).intersection(all_format_metrics)
+            set(requested_metrics).intersection(filtered_format_metrics)
             )
         unavailable_info_metrics = list(
-            set(requested_metrics).difference(all_info_metrics)
+            set(requested_metrics).difference(filtered_info_metrics)
             )
         unavailable_format_metrics = list(
-            set(requested_metrics).difference(all_format_metrics)
+            set(requested_metrics).difference(filtered_format_metrics)
             )
         unavailable_metrics = [unavailable_info_metrics,
                                unavailable_format_metrics]
