@@ -381,18 +381,20 @@ def create_plot(array1, array2):
     # make TPFP column for dataframe
     TPFP = ([label1] * len(array1)) + ([label2] * len(array2))
     # make dataframe
-    df = pd.DataFrame({'values': values, 'TPFP': TPFP, 'centiles': centiles})
+    df = pd.DataFrame(
+        {'values': values, 'TPFP': TPFP, 'centiles': centiles}
+        )
     fig = px.histogram(
-        df, x='values', color='TPFP', hover_data=[df.columns[2]],
-        marginal='rug', barmode='overlay'
+        df, x='values', color='TPFP',
+        hover_data=[df.columns[2]], marginal='rug', barmode='overlay'
         )
     # set format for hovertext using hovertemplate (even index = histogram,
     # odd index = rug)
     for i, trace in enumerate(fig['data']):
         group = trace['legendgroup']
         if i % 2 == 0:
-            trace['hovertemplate'] = (f'TPFP={group}<br>Bin=%{{x}}<extra>'
-                                      '</extra>')
+            trace['hovertemplate'] = (f'True/False Positive={group}<br>'
+                                      'Bin=%{x}<extra></extra>')
         else:
             trace['hovertemplate'] = ('<br>Metric value=%{x}<br>Centile=%'
                                       '{customdata[0]}<br><extra></extra>')
