@@ -3,6 +3,9 @@ A tool to plot distributions of VCF metrics separated by True Positive / False P
 
 Use the output of this tool to decide QC thresholds above or below which Sanger confirmation may not be necessary.
 
+USAGE:
+python3 FPTP.py --happy [happy vcf] --query [query vcf] [options]
+
 
 INPUT:
 1) a hap.py VCF (found in the zipped folder created by vcfeval_hap.py).
