@@ -159,6 +159,7 @@ def check_metrics(query, metrics):
             )
         sys.exit(1)
     try:
+
         vcf_reader = vcf.Reader(filename=query)
         # parse out metric names - separate info and format metrics in case
         # of identical names (usually DP)
@@ -398,9 +399,6 @@ def create_plot(array1, array2):
         else:
             trace['hovertemplate'] = ('<br>Metric value=%{x}<br>Centile=%'
                                       '{customdata[0]}<br><extra></extra>')
-    if len(array1) < 1 and len(array2) < 1:
-        # do something to indicate insufficient data for this metric combo??
-        return None
     return fig
 
 
