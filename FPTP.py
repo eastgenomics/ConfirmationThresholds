@@ -99,6 +99,7 @@ def get_sample_names(sample1, sample2):
         global SAMPLE2_NAME
         SAMPLE1_NAME = re.split('[.-]', sample1)[0]
         SAMPLE2_NAME = re.split('[.-]', sample2)[0]
+        return 0
     except Exception as error:
         print(
             f'One of {sample1} or {sample2} does not match the expected '
@@ -297,7 +298,7 @@ def infer_snp_indel(ref, alt):
             'VCF. Please provide normalised VCF data.'
             )
         sys.exit(1)
-    elif len(ref) == 1 or len(alt) == 1:
+    elif len(ref) == 1 and len(alt) == 1:
         snp_indel = 'SNP'
     else:
         snp_indel = 'INDEL'
