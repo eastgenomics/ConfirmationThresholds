@@ -160,23 +160,23 @@ def check_metrics(query, metrics):
             )
         sys.exit(1)
     try:
-        with vcf.Reader(filename=query) as vcf_reader:
-            # parse out metric names - separate info and format metrics in case
-            # of identical names (usually DP)
-            filtered_info_metrics = []
-            filtered_format_metrics = []
-            # grab only metrics where the type is float or integer (as
-            # others cannot be plotted) and also where the number of values
-            # is constrained to 1. The latter constraint will be modified
-            # to accept lists of values in later versions of this tool.
-            info_metrics = vcf_reader.infos
-            for i, j in info_metrics.items():
-                if j.type in ('Integer', 'Float') and j.num == 1:
-                    filtered_info_metrics.append(i)
-            format_metrics = vcf_reader.formats
-            for i, j in format_metrics.items():
-                if j.type in ('Integer', 'Float') and j.num == 1:
-                    filtered_format_metrics.append(i)
+        vcf_reader = vcf.Reader(filename=query)
+        # parse out metric names - separate info and format metrics in case
+        # of identical names (usually DP)
+        filtered_info_metrics = []
+        filtered_format_metrics = []
+        # grab only metrics where the type is float or integer (as
+        # others cannot be plotted) and also where the number of values
+        # is constrained to 1. The latter constraint will be modified
+        # to accept lists of values in later versions of this tool.
+        info_metrics = vcf_reader.infos
+        for i, j in info_metrics.items():
+            if j.type in ('Integer', 'Float') and j.num == 1:
+                filtered_info_metrics.append(i)
+        format_metrics = vcf_reader.formats
+        for i, j in format_metrics.items():
+            if j.type in ('Integer', 'Float') and j.num == 1:
+                filtered_format_metrics.append(i)
     except Exception as error:
         print(
             '\nError retreiving query VCF metrics. Please check format.\n'
@@ -219,44 +219,44 @@ def parse_query(query, happy=True):
     metrics and values, paired to variants.
     '''
     try:
-        with vcf.Reader(filename=query) as vcf_reader:
-            variant_dict = {}
-            for record in vcf_reader:
-                chrom = str(record.CHROM)
-                pos = str(record.POS)
-                ref = str(record.REF)
-                # take only alt #1 (should only be one anyway)
-                alt = str(record.ALT[0])
-                variant = (f'{chrom}_{pos}_{ref}_{alt}')
-                vcf_info = record.INFO
-                vcf_format = record.FORMAT.split(':')
-                # assume only one sample per vcf
-                vcf_sample = record.samples[0]
-                metric_dict = {}
-                if not happy:
-                    # get samplename
-                    metric_dict['TPFP_or_samplename'] = (
-                                    query.split('.')[0].split('-')[0]
-                                    )
-                    # infer SNP/INDEL status based on ref/alt fields
-                    metric_dict['snp_indel'] = infer_snp_indel(ref, alt)
-                    # infer het/hom status based on genotype field
-                    metric_dict['HETHOM'] = infer_het_hom(vcf_sample['GT'])
-                # add info metrics to dictionary
-                for key, val in vcf_info.items():
-                    name = f'info_{key}'
-                    # catch list values - take only alt #1
-                    if type(val) is list:
-                        value = val[0]
-                    else:
-                        value = val
-                    metric_dict[name] = value
-                # add format/genotype metrics to dictionary
-                for i in vcf_format:
-                    name = f'format_{i}'
-                    value = vcf_sample[i]
-                    metric_dict[name] = value
-                variant_dict[variant] = metric_dict
+        vcf_reader = vcf.Reader(filename=query)
+        variant_dict = {}
+        for record in vcf_reader:
+            chrom = str(record.CHROM)
+            pos = str(record.POS)
+            ref = str(record.REF)
+            # take only alt #1 (should only be one anyway)
+            alt = str(record.ALT[0])
+            variant = (f'{chrom}_{pos}_{ref}_{alt}')
+            vcf_info = record.INFO
+            vcf_format = record.FORMAT.split(':')
+            # assume only one sample per vcf
+            vcf_sample = record.samples[0]
+            metric_dict = {}
+            if not happy:
+                # get samplename
+                metric_dict['TPFP_or_samplename'] = (
+                                query.split('.')[0].split('-')[0]
+                                )
+                # infer SNP/INDEL status based on ref/alt fields
+                metric_dict['snp_indel'] = infer_snp_indel(ref, alt)
+                # infer het/hom status based on genotype field
+                metric_dict['HETHOM'] = infer_het_hom(vcf_sample['GT'])
+            # add info metrics to dictionary
+            for key, val in vcf_info.items():
+                name = f'info_{key}'
+                # catch list values - take only alt #1
+                if type(val) is list:
+                    value = val[0]
+                else:
+                    value = val
+                metric_dict[name] = value
+            # add format/genotype metrics to dictionary
+            for i in vcf_format:
+                name = f'format_{i}'
+                value = vcf_sample[i]
+                metric_dict[name] = value
+            variant_dict[variant] = metric_dict
     except Exception as error:
         print(
             '\nError parsing query VCF. Please check format.\n'
@@ -311,22 +311,22 @@ def parse_happy(happy):
     of variants paired with TP/FP, SNP/INDEL, & het/hom status.
     '''
     try:
-        with vcf.Reader(filename=happy) as vcf_reader:
-            variant_dict = {}
-            for record in vcf_reader:
-                chrom = str(record.CHROM)
-                pos = str(record.POS)
-                ref = str(record.REF)
-                # take only alt #1 (should only be one anyway)
-                alt = str(record.ALT[0])
-                variant = (f'{chrom}_{pos}_{ref}_{alt}')
-                # assume query is second sample (should be)
-                vcf_sample = record.samples[1]
-                cat_dict = {}
-                cat_dict['TPFP_or_samplename'] = vcf_sample['BD']
-                cat_dict['snp_indel'] = vcf_sample['BVT']
-                cat_dict['HETHOM'] = vcf_sample['BLT']
-                variant_dict[variant] = cat_dict
+        vcf_reader = vcf.Reader(filename=happy)
+        variant_dict = {}
+        for record in vcf_reader:
+            chrom = str(record.CHROM)
+            pos = str(record.POS)
+            ref = str(record.REF)
+            # take only alt #1 (should only be one anyway)
+            alt = str(record.ALT[0])
+            variant = (f'{chrom}_{pos}_{ref}_{alt}')
+            # assume query is second sample (should be)
+            vcf_sample = record.samples[1]
+            cat_dict = {}
+            cat_dict['TPFP_or_samplename'] = vcf_sample['BD']
+            cat_dict['snp_indel'] = vcf_sample['BVT']
+            cat_dict['HETHOM'] = vcf_sample['BLT']
+            variant_dict[variant] = cat_dict
     except Exception as error:
         print(
             '\nError parsing happy VCF. Please check format.'
