@@ -29,6 +29,11 @@ SAMPLE2_NAME = ''
 def get_args():
     '''
     Parses command line arguments. Returns the arguments as strings.
+    
+    INPUT
+    nothing
+    RETURN
+    argparse namespace object
     '''
     parser = argparse.ArgumentParser(
 
@@ -93,6 +98,11 @@ def get_sample_names(sample1, sample2):
     Takes two input file names (strings in the format
     samplename-some-metadata-fields.vcf.gz) and returns just
     the sample names as global variables
+
+    INPUT
+    2 strings
+    RETURN
+    nothing
     '''
     try:
         global SAMPLE1_NAME
@@ -113,6 +123,11 @@ def check_happy_query_match(happy, query):
     Checks that the sample name (string) matches between hap.py VCF and query
     VCF (as variants will need to be matched between the two to assign TP/FP)
     Takes filenames as input and returns True or AssertionError
+    
+    INPUT
+    2 strings
+    RETURN
+    assertion error if not matching, otherwise True (boolean)
     '''
     if happy:
         assert happy == query, (
@@ -127,6 +142,11 @@ def check_multiple_query_metrics(query, metrics):
     '''
     Takes list of (2) query VCFs (filenames as strings) and a list of metrics
     (strings). Returns all shared metrics (list of strings).
+
+    INPUT
+    2 lists of strings
+    RETURN
+    1 list of strings
     '''
     available_metrics1 = check_metrics(query[0], metrics)
     available_metrics2 = check_metrics(query[1], metrics)
@@ -146,6 +166,11 @@ def check_metrics(query, metrics):
     Takes list of metrics (strings) and a query VCF (filename as string).
     Checks that all metrics requested are available in query VCF. Returns list
     of useable metrics (strings) for plotting.
+
+    INPUT
+    1 string (query filename) and 1 list of strings
+    RETURN
+    1 list of strings
     '''
     try:
         if metrics == 'all':
@@ -216,6 +241,11 @@ def parse_query(query, happy=True):
     '''
     Takes a query vcf filename (string). Returns a dictionary of relevant
     metrics and values, paired to variants.
+
+    INPUT
+    1 string (query filename) and 1 optional boolean
+    RETURN
+    1 dictionary of dictionaries
     '''
     try:
         vcf_reader = vcf.Reader(filename=query)
@@ -268,6 +298,11 @@ def parse_query(query, happy=True):
 def infer_het_hom(genotype):
     '''
     Take genotype field, return het or homalt label
+
+    INPUT
+    1 string
+    RETURN
+    1 string
     '''
     if genotype == '0/0':
         hethom = 'homref'
@@ -290,6 +325,11 @@ def infer_snp_indel(ref, alt):
     Take ref & alt fields, return SNP or INDEL label. Input VCF must be
     normalised for this method to work (i.e. one variant per position).
     Possibly redundant as pyvcf has is_SNP or is_Indel methods?
+
+    INPUT
+    2 strings
+    RETURN
+    1 string
     '''
     if ',' in alt:
         print(
@@ -308,6 +348,11 @@ def parse_happy(happy):
     '''
     Takes a Hap.py output vcf containing TP & FP calls. Returns a dictionary
     of variants paired with TP/FP, SNP/INDEL, & het/hom status.
+    
+    INPUT
+    1 string (happy filename)
+    RETURN
+    1 dictionary of dictionaries
     '''
     try:
         vcf_reader = vcf.Reader(filename=happy)
@@ -340,6 +385,11 @@ def decide_bins(array):
     Take numpy array & use number and range of values to determine
     appropriate bin number for histopgram. Returns recommended bin size.
     Not in use but may be resurrected if I decide to change histogram defaults.
+    
+    INPUT
+    1 numpy array
+    RETURN
+    1 float
     '''
     array_length = len(array)
     array_range = max(array) - min(array)
@@ -354,6 +404,11 @@ def calculate_centiles(array):
     '''
     Take list of numbers & return a list of equal length representing
     centiles for each value in the input list.
+
+    INPUT
+    1 list
+    RETURN
+    1 numpy array
     '''
     centiles = []
     for i in array:
@@ -366,6 +421,11 @@ def create_plot(array1, array2):
     '''
     Given two lists of metric values, plot corresponding distributions and
     return plot object.
+
+    INPUT
+    2 lists
+    RETURN
+    1 plotly figure object
     '''
     label1 = array1.pop(0)
     label2 = array2.pop(0)
@@ -410,6 +470,11 @@ def get_output_name(files, happy=True):
     (1 or more) and boolean to toggle whether matching happy files are inputs.
     Returns sample1_sample2_QCdist.html if two sample inputs, otherwise
     TPvsFP_samplename_QCdist.html for happy inputs.
+
+    INPUT
+    1 list, 1 optional boolean
+    RETURN
+    1 string
     '''
     if happy:
         sample1 = 'TPvsFP'
@@ -424,6 +489,11 @@ def make_html(plots):
     '''
     Given a list of plot objects, construct an html report and save to file?
     Output name constructed from input filenames.
+
+    INPUT
+    1 list of plotly figure objects
+    RETURN
+    1 string
     '''
     css = (
         'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css'
@@ -458,6 +528,11 @@ def make_html(plots):
 def make_report(html_string, outfile):
     '''
     Take html string (output of make_html) and save to output file
+    
+    INPUT
+    2 strings (one for html, one for output filename)
+    RETURN
+    0 if successful, otherwise exception
     '''
     try:
         with open(outfile, 'w') as out:
@@ -476,6 +551,11 @@ def merge_happy_query(happy, query):
     Take happy dict (output of parse_happy) and query dict (output of
     parse_query) & return new dictionary with matched variants and merged
     values
+
+    INPUT
+    2 dictionaries (of dictionaries)
+    RETURN
+    1 dictionary of dictionaries
     '''
     merged_dict = {}
     missing_variants = []
@@ -496,6 +576,11 @@ def merge_samples(sample1, sample2):
     '''
     Take two dictionaries, merge them, return merged dictionary. Keys now
     contain samplename in case samples share variants.
+
+    INPUT
+    2 dictionaries (of dictionaries)
+    RETURN
+    1 dictionary of dictionaries
     '''
     merged_dict = {}
     for variant in sample1:
@@ -512,6 +597,11 @@ def make_arrays(data, metric, fptp, snp_indel=None, hethom=None):
     Take merged dictionary, return two arrays (happy vs query, or sample1 vs
     sample2) of relevant metric values for plotting, split according to
     category (SNP/INDEL, het/hom).
+
+    INPUT
+    1 dictionary (of dictionaries), 1 string, 1 list, 2 optional strings
+    RETURN
+    1 list of lists
     '''
     array1 = [fptp[0]]
     array2 = [fptp[1]]
@@ -559,6 +649,11 @@ def make_arrays(data, metric, fptp, snp_indel=None, hethom=None):
 def make_plots(data, metrics, happy=True):
     '''
     Take merged data and list of metrics. Return list of plot objects.
+    
+    INPUT
+    1 dictionary, 1 list, 1 optional boolean
+    RETURN
+    1 list of plotly figure objects
     '''
     plot_list = []
     if happy:
@@ -587,8 +682,13 @@ def make_plots(data, metrics, happy=True):
 
 def make_tiled_figure(subfigs, metric):
     '''
-    Take list of figures ( figure factory plot objects) to be combined into
+    Take list of figures (plotly plot objects) to be combined into
     tiled image. Return single figure object with tiled subplots.
+    
+    INPUT
+    1 list of plotly figure objects, 1 string
+    RETURN
+    1 plotly figure object
     '''
     fig = make_subplots(rows=1, cols=4, subplot_titles=[
         'SNP', 'INDEL', 'HET', 'HOM'])
