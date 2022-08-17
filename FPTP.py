@@ -9,15 +9,14 @@ Author: Chris Pyatt
 import argparse
 import re
 import sys
-import pandas as pd
-import numpy as np
-import chart_studio.plotly as py
-import plotly.figure_factory as ff
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
-import gzip
 import math
-from IPython.display import HTML
+import numpy as np
+import pandas as pd
+import scipy.stats as st
+import plotly.io as pio
+import plotly.express as px
+from plotly.subplots import make_subplots
+import vcf
 
 
 # global variables
@@ -29,7 +28,12 @@ SAMPLE2_NAME = ''
 
 def get_args():
     '''
-    Parses command line arguments. Returns the arguments as strings.
+    Parses command line arguments.
+    
+    INPUT
+    nothing
+    RETURN
+    argparse namespace object
     '''
     parser = argparse.ArgumentParser(
 
@@ -83,7 +87,7 @@ def get_args():
         or (len(args.query) == 2 and len(args.happy.split(',')) == 1)
         or (len(args.happy.split(',')) > 1)
     ):
-        parser.print_help()
+        print('Please check you are providing the correct inputs (--help)')
         sys.exit(1)
     else:
         return args
@@ -91,12 +95,16 @@ def get_args():
 
 def get_sample_names(sample1, sample2):
     '''
-    Takes two input files (should be in the format
-    samplename-some-metadata-fields.vcf.gz) and returns just
+    Takes two input file names (in the format
+    samplename-some-metadata-fields.vcf.gz) and stores just
     the sample names as global variables
+
+    INPUT
+    2 strings
+    RETURN
+    nothing
     '''
     try:
-        # is declaring as global necessary if declared at top of script?
         global SAMPLE1_NAME
         global SAMPLE2_NAME
         SAMPLE1_NAME = re.split('[.-]', sample1)[0]
@@ -112,8 +120,13 @@ def get_sample_names(sample1, sample2):
 
 def check_happy_query_match(happy, query):
     '''
-    Checks that the sample name matches between hap.py VCF and query VCF
-    (as variants will need to be matched between the two to assign TP/FP)
+    Checks that the sample name matches between hap.py VCF and query
+    VCF (as variants will need to be matched between the two to assign TP/FP)
+    
+    INPUT
+    2 strings
+    RETURN
+    assertion error if not matching, otherwise True (boolean)
     '''
     if happy:
         assert happy == query, (
@@ -127,7 +140,12 @@ def check_happy_query_match(happy, query):
 def check_multiple_query_metrics(query, metrics):
     '''
     Takes list of (2) query VCFs and a list of metrics. Returns all shared
-    metrics that are on the list.
+    metrics.
+
+    INPUT
+    2 lists of strings
+    RETURN
+    1 list of strings
     '''
     available_metrics1 = check_metrics(query[0], metrics)
     available_metrics2 = check_metrics(query[1], metrics)
@@ -144,8 +162,12 @@ def check_multiple_query_metrics(query, metrics):
 
 def check_metrics(query, metrics):
     '''
-    Takes list of metrics and a query VCF. Checks that all metrics requested
-    are available in query VCF. Returns list of useable metrics for plotting.
+    Checks that all metrics requested are available in query VCF.
+
+    INPUT
+    1 string (query filename) and 1 list of strings
+    RETURN
+    1 list of strings
     '''
     try:
         if metrics == 'all':
@@ -159,63 +181,46 @@ def check_metrics(query, metrics):
             )
         sys.exit(1)
     try:
-        fh = gzip.open(query, 'rt')
-        fh.close
-    except RuntimeError as error:
-        print(f'File {query} doesn\'t appear to be gzipped.')
-        print(error)
-        sys.exit(1)
-    try:
-        with gzip.open(query, 'rt') as file:
-            all_info_metrics = []
-            all_format_metrics = []
-            # parse out metric names - separate info and format metrics in
-            # case of identical names (usually DP)
-            for line in file:
-                # grab only metrics where the type is float or integer (as
-                # others cannot be plotted) and also where the number of values
-                # is constrained to 1. The latter constraint will be modified
-                # to accept lists of values in later versions of this tool.
-                if (
-                    line.startswith('##INFO') and
-                    ('Integer' in line.split(',')[2] or
-                     'Float' in line.split(',')[2]) and
-                    line.split(',')[1] == 'Number=1'
-                     ):
-                    all_info_metrics.append(line.split(',')[0].split('=')[-1])
-                elif (
-                    line.startswith('##FORMAT') and
-                    ('Integer' in line.split(',')[2] or
-                     'Float' in line.split(',')[2]) and
-                    line.split(',')[1] == 'Number=1'
-                      ):
-                    all_format_metrics.append(
-                        line.split(',')[0].split('=')[-1]
-                        )
-                elif line.startswith('#CHROM'):
-                    break
+
+        vcf_reader = vcf.Reader(filename=query)
+        # parse out metric names - separate info and format metrics in case
+        # of identical names (usually DP)
+        filtered_info_metrics = []
+        filtered_format_metrics = []
+        # grab only metrics where the type is float or integer (as
+        # others cannot be plotted) and also where the number of values
+        # is constrained to 1. The latter constraint will be modified
+        # to accept lists of values in later versions of this tool.
+        info_metrics = vcf_reader.infos
+        for i, j in info_metrics.items():
+            if j.type in ('Integer', 'Float') and j.num == 1:
+                filtered_info_metrics.append(i)
+        format_metrics = vcf_reader.formats
+        for i, j in format_metrics.items():
+            if j.type in ('Integer', 'Float') and j.num == 1:
+                filtered_format_metrics.append(i)
     except Exception as error:
         print(
-            '\nError retreiving query VCF metrics. Please check format.'
+            '\nError retreiving query VCF metrics. Please check format.\n'
             f'Error: {error}'
             )
         sys.exit(1)
     if requested_metrics == 'all':
-        available_info_metrics = all_info_metrics
-        available_format_metrics = all_format_metrics
+        available_info_metrics = filtered_info_metrics
+        available_format_metrics = filtered_format_metrics
         unavailable_metrics = [[], []]
     else:
         available_info_metrics = list(
-            set(requested_metrics).intersection(all_info_metrics)
+            set(requested_metrics).intersection(filtered_info_metrics)
             )
         available_format_metrics = list(
-            set(requested_metrics).intersection(all_format_metrics)
+            set(requested_metrics).intersection(filtered_format_metrics)
             )
         unavailable_info_metrics = list(
-            set(requested_metrics).difference(all_info_metrics)
+            set(requested_metrics).difference(filtered_info_metrics)
             )
         unavailable_format_metrics = list(
-            set(requested_metrics).difference(all_format_metrics)
+            set(requested_metrics).difference(filtered_format_metrics)
             )
         unavailable_metrics = [unavailable_info_metrics,
                                unavailable_format_metrics]
@@ -232,58 +237,56 @@ def check_metrics(query, metrics):
 
 def parse_query(query, happy=True):
     '''
-    Takes a query vcf filename. Returns a dictionary of relevant metrics and
-    values, paired to variants.
+    Takes a query vcf filename. Returns a dictionary of relevant
+    metrics and values, paired to variants.
+
+    INPUT
+    1 string (query filename) and 1 optional boolean
+    RETURN
+    1 dictionary of dictionaries
     '''
     try:
-        fh = gzip.open(query, 'rt')
-        fh.close
-    except RuntimeError as error:
-        print(f'File {query} doesn\'t appear to be gzipped.')
-        print(error)
-        sys.exit(1)
-    try:
-        with gzip.open(query, 'rt') as file:
-            variant_dict = {}
-            for line in file:
-                if not line.startswith('#'):
-                    variant = (
-                        line.split('\t')[0] + '_' + line.split('\t')[1] + '_'
-                        + line.split('\t')[3] + '_' + line.split('\t')[4]
-                    )
-                    vcf_info = line.split('\t')[7].split(';')
-                    vcf_format = line.split('\t')[8].split(':')
-                    vcf_genotype = line.rstrip().split('\t')[9].split(':')
-                    metric_dict = {}
-                    if not happy:
-                        # get samplename
-                        metric_dict['TPFP_or_samplename'] = (
-                                        query.split('.')[0].split('-')[0]
-                        )
-                        # infer SNP/INDEL status based on ref/alt fields
-                        metric_dict['snp_indel'] = infer_snp_indel(
-                            variant.split('_')[2], variant.split('_')[3]
-                            )
-                        # infer het/hom status based on genotype field
-                        metric_dict['HETHOM'] = infer_het_hom(vcf_genotype[0])
-                    # add info metrics to dictionary
-                    for item in vcf_info:
-                        name = 'info_' + item.split('=')[0]
-                        # catch flag metrics
-                        try:
-                            value = item.split('=')[1]
-                        except IndexError:
-                            value = True
-                        metric_dict[name] = value
-                    # add format/genotype metrics to dictionary
-                    for i in range(len(vcf_format)):
-                        name = 'format_' + vcf_format[i]
-                        value = vcf_genotype[i]
-                        metric_dict[name] = value
-                    variant_dict[variant] = metric_dict
+        vcf_reader = vcf.Reader(filename=query)
+        variant_dict = {}
+        for record in vcf_reader:
+            chrom = record.CHROM
+            pos = record.POS
+            ref = str(record.REF)
+            # take only alt #1 (should only be one anyway)
+            assert len(record.ALT) == 1, 'multi allelic variant found'
+            alt = str(record.ALT[0])
+            variant = (f'{chrom}_{pos}_{ref}_{alt}')
+            vcf_info = record.INFO
+            vcf_format = record.FORMAT.split(':')
+            # assume only one sample per vcf
+            vcf_sample = record.samples[0]
+            metric_dict = {}
+            if not happy:
+                # get samplename
+                metric_dict['TPFP_or_samplename'] = (
+                                query.split('.')[0].split('-')[0]
+                                )
+                # infer SNP/INDEL status based on ref/alt fields
+                metric_dict['snp_indel'] = infer_snp_indel(ref, alt)
+                # infer het/hom status based on genotype field
+                metric_dict['HETHOM'] = infer_het_hom(vcf_sample['GT'])
+            # add info metrics to dictionary
+            for key, val in vcf_info.items():
+                name = f'info_{key}'
+                # catch list values - take only alt #1
+                if isinstance(val, list):
+                    value = val[0]
+                else:
+                    value = val
+                metric_dict[name] = value
+            # add format/genotype metrics to dictionary
+            metric_dict.update(
+                {f'format_{i}': vcf_sample.get(i) for i in vcf_format}
+            )
+            variant_dict[variant] = metric_dict
     except Exception as error:
         print(
-            '\nError parsing query VCF. Please check format.'
+            '\nError parsing query VCF. Please check format.\n'
             f'Error: {error}'
             )
         sys.exit(1)
@@ -293,6 +296,11 @@ def parse_query(query, happy=True):
 def infer_het_hom(genotype):
     '''
     Take genotype field, return het or homalt label
+
+    INPUT
+    1 string
+    RETURN
+    1 string
     '''
     if genotype == '0/0':
         hethom = 'homref'
@@ -314,6 +322,14 @@ def infer_snp_indel(ref, alt):
     '''
     Take ref & alt fields, return SNP or INDEL label. Input VCF must be
     normalised for this method to work (i.e. one variant per position).
+    Possibly redundant as pyvcf has is_SNP or is_Indel methods?
+
+    INPUT
+    2 strings
+    RETURN
+    1 string
+
+    TODO: probably remove function and use pyvcf in parse_query for next version
     '''
     if ',' in alt:
         print(
@@ -332,33 +348,29 @@ def parse_happy(happy):
     '''
     Takes a Hap.py output vcf containing TP & FP calls. Returns a dictionary
     of variants paired with TP/FP, SNP/INDEL, & het/hom status.
+    
+    INPUT
+    1 string (happy filename)
+    RETURN
+    1 dictionary of dictionaries
     '''
     try:
-        fh = gzip.open(happy, 'rt')
-        fh.close
-    except RuntimeError as error:
-        print(f'File {happy} doesn\'t appear to be gzipped.')
-        print(error)
-        sys.exit(1)
-    try:
-        with gzip.open(happy, 'rt') as file:
-            variant_dict = {}
-            for line in file:
-                # ignores other info in file e.g. 'CALL_WEIGHT', 'Genotype',
-                # 'variant quality for ROC creation', etc.
-                cat_dict = {}
-                if not line.startswith('#'):
-                    variant = (
-                        line.split('\t')[0] + '_' + line.split('\t')[1] + '_'
-                        + line.split('\t')[3] + '_' + line.split('\t')[4]
-                    )
-                    query_info = line.split('\t')[10].split(':')
-                    cat_dict['TPFP_or_samplename'] = query_info[1]
-                    cat_dict['snp_indel'] = query_info[5]
-                    cat_dict['HETHOM'] = query_info[6].rstrip()
-                else:
-                    continue
-                variant_dict[variant] = cat_dict
+        vcf_reader = vcf.Reader(filename=happy)
+        variant_dict = {}
+        for record in vcf_reader:
+            chrom = record.CHROM
+            pos = record.POS
+            ref = record.REF
+            # take only alt #1 (should only be one anyway)
+            alt = record.ALT[0]
+            variant = (f'{chrom}_{pos}_{ref}_{alt}')
+            # assume query is second sample (should be)
+            vcf_sample = record.samples[1]
+            cat_dict = {}
+            cat_dict['TPFP_or_samplename'] = vcf_sample['BD']
+            cat_dict['snp_indel'] = vcf_sample['BVT']
+            cat_dict['HETHOM'] = vcf_sample['BLT']
+            variant_dict[variant] = cat_dict
     except Exception as error:
         print(
             '\nError parsing happy VCF. Please check format.'
@@ -371,7 +383,13 @@ def parse_happy(happy):
 def decide_bins(array):
     '''
     Take numpy array & use number and range of values to determine
-    appropriate bin size for histopgram. Returns bin size as integer.
+    appropriate bin number for histopgram. Returns recommended bin size.
+    Not in use but may be resurrected if I decide to change histogram defaults.
+
+    INPUT
+    1 numpy array
+    RETURN
+    1 float
     '''
     array_length = len(array)
     array_range = max(array) - min(array)
@@ -382,25 +400,67 @@ def decide_bins(array):
     return bin_size
 
 
-def create_plot(array1, array2, name):
+def calculate_centiles(vals):
     '''
-    Given two arrays of metric values, plot corresponding distributions and
-    return plot object. Name variable to be title of plot?
+    Take list of numbers & return a list of equal length representing
+    centiles for each value in the input list.
+
+    INPUT
+    1 list
+    RETURN
+    1 numpy array
     '''
-    labels = [array1.pop(0), array2.pop(0)]
-    colours = ['#eb8909', '#09ebeb']
-    if len(array1) < 1 or len(array2) < 1:
-        # do something to indicate insufficient data for this metric combo??
-        return None
-    # decide bin sizes based on array1 (should be TPs so the longer dataset)
-    bin_size = decide_bins(array1)
-    # convert arrays to dataframe with column headers
-    hist_data = [np.array(array1), np.array(array2)]
-    # make distribution plot object
-    fig = ff.create_distplot(
-                             hist_data, labels, bin_size=bin_size,
-                             colors=colours, show_curve=False
-                             )
+    centiles = [round(st.percentileofscore(vals, i), 2) for i in vals]
+    return np.array(centiles)
+
+
+def create_plot(list1, list2):
+    '''
+    Given two lists of metric values, plot corresponding distributions and
+    return plot object.
+
+    INPUT
+    2 lists
+    RETURN
+    1 plotly figure object
+    '''
+    # grab labels (TP/FP or samplename) to make column below
+    # uses pop() as string label needs separating from int values
+    label1 = list1.pop(0)
+    label2 = list2.pop(0)
+    # make combined df column
+    values = list1 + list2
+    # calculate centiles for each entry in the arrays (displayed silently)
+    # and turn into column for dataframe (same order as values)
+    centiles = list(
+        calculate_centiles(list1)
+        ) + list(
+            calculate_centiles(list2)
+            )
+    # make TPFP column for dataframe
+    TPFP = ([label1] * len(list1)) + ([label2] * len(list2))
+    # make dataframe
+    df = pd.DataFrame(
+        {'values': values, 'TPFP': TPFP, 'centiles': centiles}
+        )
+    fig = px.histogram(
+        df, x='values', color='TPFP',
+        hover_data=[df.columns[2]], marginal='rug', barmode='overlay'
+        )
+    # set format for hovertext using hovertemplate (even index = histogram,
+    # odd index = rug)
+    for i, trace in enumerate(fig['data']):
+        group = trace['legendgroup']
+        if i % 2 == 0:
+            trace['hovertemplate'] = (
+                f'True/False Positive={group}<br>'
+                'Bin=%{x}<extra></extra>'
+                )
+        else:
+            trace['hovertemplate'] = (
+                '<br>Metric value=%{x}<br>'
+                'Centile=%{customdata[0]}<br><extra></extra>'
+                )
     return fig
 
 
@@ -410,26 +470,79 @@ def get_output_name(files, happy=True):
     (1 or more) and boolean to toggle whether matching happy files are inputs.
     Returns sample1_sample2_QCdist.html if two sample inputs, otherwise
     TPvsFP_samplename_QCdist.html for happy inputs.
+
+    INPUT
+    1 list, 1 optional boolean
+    RETURN
+    1 string
     '''
     if happy:
         sample1 = 'TPvsFP'
     else:
-        sample1 = files[0].split('.')[0].split('-')[0]
-    sample2 = files[1].split('.')[0].split('-')[0]
+        sample1 = files[0].split('-')[0]
+    sample2 = files[1].split('-')[0]
     output = f'{sample1}_{sample2}_QCdist.html'
     return output
 
 
-def make_report(plots, outFile):
+def make_html(plots):
     '''
-    Given a list of plot objects, construct an html report and save to file?
+    Given a list of plot objects, construct an html report as a string.
     Output name constructed from input filenames.
+
+    INPUT
+    1 list of plotly figure objects
+    RETURN
+    1 string
     '''
-    pass
-    #for plot_obj in plots:
-    #    plot_url = py.plot(plot_obj, filename='plot_object', auto_open=False,)
-    #    print(plot_url)
-    #return
+    css = (
+        'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css'
+        )
+    html_string = (
+        f'<html><head><link rel="stylesheet" href="{css}">'
+        '<style>body{{ margin:0 100; background:whitesmoke; }}'
+        '</style><script src="https://cdn.plot.ly/plotly-2.12.1'
+        '.min.js"></script></head><body>'
+        '<h1>QC True/False Positive Distributions</h1>'
+        '<h4>Each metric requested is plotted below, with separate'
+        ' plots for SNP, INDEL, HET, & HOM variants. Each axis '
+        'contains a histogram distribution of the metric values for'
+        ' that group, plus a rug plot along the bottom showing all '
+        'datapoints. Hover over the rug plot to get information'
+        ' about the metric value at that point and the centile that'
+        ' value represents within the data used to generate this '
+        'report.</h4>'
+        )
+    for i in plots:
+        metric = i['layout']['title']['text']
+        plot_div = pio.to_html(i, full_html=False, include_plotlyjs='cdn')
+        html_string = html_string + (
+            f'<h2>True & False Positive - {metric}.</h2>'
+        )
+        html_string = html_string + plot_div
+
+    html_string = html_string + '</body></html>'
+    return html_string
+
+
+def make_report(html_string, outfile):
+    '''
+    Take html string (output of make_html) and save to output file
+    
+    INPUT
+    2 strings (one for html, one for output filename)
+    RETURN
+    nothing if successful, otherwise exception
+    '''
+    try:
+        with open(outfile, 'w') as out:
+            out.write(html_string)
+    except Exception as error:
+        print(
+            '\nError saving output to html file.'
+            f'Error: {error}'
+            )
+        sys.exit(1)
 
 
 def merge_happy_query(happy, query):
@@ -437,6 +550,11 @@ def merge_happy_query(happy, query):
     Take happy dict (output of parse_happy) and query dict (output of
     parse_query) & return new dictionary with matched variants and merged
     values
+
+    INPUT
+    2 dictionaries (of dictionaries)
+    RETURN
+    1 dictionary of dictionaries
     '''
     merged_dict = {}
     missing_variants = []
@@ -457,25 +575,34 @@ def merge_samples(sample1, sample2):
     '''
     Take two dictionaries, merge them, return merged dictionary. Keys now
     contain samplename in case samples share variants.
+
+    INPUT
+    2 dictionaries (of dictionaries)
+    RETURN
+    1 dictionary of dictionaries
     '''
-    merged_dict = {}
-    for variant in sample1:
-        new_key = SAMPLE1_NAME + '-' + variant
-        merged_dict[new_key] = sample1[variant]
-    for variant in sample2:
-        new_key = SAMPLE2_NAME + '-' + variant
-        merged_dict[new_key] = sample2[variant]
+    merged_dict = (
+        {f'{SAMPLE1_NAME}-{variant}': sample1[variant] for variant in sample1}
+        )
+    merged_dict.update(
+        {f'{SAMPLE2_NAME}-{variant}': sample2[variant] for variant in sample2}
+        )
     return merged_dict
 
 
-def make_arrays(data, metric, fptp, snp_indel=None, hethom=None):
+def make_lists(data, metric, fptp, snp_indel=None, hethom=None):
     '''
-    Take merged dictionary, return two arrays (happy vs query, or sample1 vs
+    Take merged dictionary, return two lists (happy vs query, or sample1 vs
     sample2) of relevant metric values for plotting, split according to
     category (SNP/INDEL, het/hom).
+
+    INPUT
+    1 dictionary (of dictionaries), 1 string, 1 list, 2 optional strings
+    RETURN
+    1 list of lists
     '''
-    array1 = [fptp[0]]
-    array2 = [fptp[1]]
+    list1 = [fptp[0]]
+    list2 = [fptp[1]]
     if snp_indel:
         filtered_keys_1 = (
             [k for k, v in data.items() if v['TPFP_or_samplename'] == fptp[0]
@@ -485,7 +612,7 @@ def make_arrays(data, metric, fptp, snp_indel=None, hethom=None):
             [k for k, v in data.items() if v['TPFP_or_samplename'] == fptp[1]
              and v['snp_indel'] == snp_indel]
         )
-    if hethom:
+    elif hethom:
         filtered_keys_1 = (
             [k for k, v in data.items() if v['TPFP_or_samplename'] == fptp[0]
              and v['HETHOM'] == hethom]
@@ -502,24 +629,29 @@ def make_arrays(data, metric, fptp, snp_indel=None, hethom=None):
             [k for k, v in data.items() if v['TPFP_or_samplename'] == fptp[1]]
         )
     for item in filtered_keys_1:
-        # try to append metric value to array but catch occurrences where
+        # try to append metric value to list but catch occurrences where
         # metric is not present for that variant (usually metrics like
         # BaseQRankSum, ClippingRankSum, ExcessHet, etc.)
         try:
-            array1.append(float(data[item][metric]))
+            list1.append(float(data[item][metric]))
         except KeyError:
             pass
     for item in filtered_keys_2:
         try:
-            array2.append(float(data[item][metric]))
+            list2.append(float(data[item][metric]))
         except KeyError:
             pass
-    return [array1, array2]
+    return [list1, list2]
 
 
 def make_plots(data, metrics, happy=True):
     '''
     Take merged data and list of metrics. Return list of plot objects.
+    
+    INPUT
+    1 dictionary, 1 list, 1 optional boolean
+    RETURN
+    1 list of plotly figure objects
     '''
     plot_list = []
     if happy:
@@ -528,61 +660,46 @@ def make_plots(data, metrics, happy=True):
         fptp = [SAMPLE1_NAME, SAMPLE2_NAME]
     for metric in metrics:
         # make filtered arrays for each variant category
-        snp_arrays = make_arrays(data, metric, fptp, snp_indel='SNP')
-        indel_arrays = make_arrays(data, metric, fptp, snp_indel='INDEL')
-        het_arrays = make_arrays(data, metric, fptp, hethom='het')
-        hom_arrays = make_arrays(data, metric, fptp, hethom='homalt')
+        snp_arrays = make_lists(data, metric, fptp, snp_indel='SNP')
+        indel_arrays = make_lists(data, metric, fptp, snp_indel='INDEL')
+        het_arrays = make_lists(data, metric, fptp, hethom='het')
+        hom_arrays = make_lists(data, metric, fptp, hethom='homalt')
         # make plots for each category
-        snp_plot = create_plot(snp_arrays[0], snp_arrays[1], 'SNP')
-        indel_plot = create_plot(indel_arrays[0], indel_arrays[1], 'INDEL')
-        het_plot = create_plot(het_arrays[0], het_arrays[1], 'HET')
-        hom_plot = create_plot(hom_arrays[0], hom_arrays[1], 'HOM')
+        snp_plot = create_plot(snp_arrays[0], snp_arrays[1])
+        indel_plot = create_plot(indel_arrays[0], indel_arrays[1])
+        het_plot = create_plot(het_arrays[0], het_arrays[1])
+        hom_plot = create_plot(hom_arrays[0], hom_arrays[1])
         # make tiled figure with all of the above
         fig = make_tiled_figure(
-                                [snp_plot, indel_plot, het_plot, hom_plot],
-                                metric
-                                )
+            [snp_plot, indel_plot, het_plot, hom_plot], metric
+            )
         plot_list.append(fig)
     return plot_list
 
 
 def make_tiled_figure(subfigs, metric):
     '''
-    Take list of figures ( figure factory plot objects) to be combined into
+    Take list of figures (plotly plot objects) to be combined into
     tiled image. Return single figure object with tiled subplots.
+    
+    INPUT
+    1 list of plotly figure objects, 1 string
+    RETURN
+    1 plotly figure object
     '''
-    fig = make_subplots(rows=2, cols=2)
+    fig = make_subplots(rows=1, cols=4, subplot_titles=[
+        'SNP', 'INDEL', 'HET', 'HOM'])
     # decide on position and add subfigures to plot
     for i, subfig in enumerate(subfigs):
-        if i in (1, 2):
-            row_val = 1
-        else:
-            row_val = 2
-        if i in (1, 3):
-            col_val = 1
-        else:
-            col_val = 2
         if subfig:
-            fig.add_trace(subfig.data[0], row=row_val, col=col_val)
+            for trace in subfig.data:
+                fig.add_trace(trace, row=1, col=i+1)
+                fig.update_layout(hovermode='x unified')
     # specify plot size and title
-    fig.update_layout(height=1000, width=1000, title_text=metric)
+    fig.update_layout(
+        height=500, width=1800, title_text=metric, showlegend=False
+        )
     return fig
-
-
-def make_html(fig):
-    '''
-    Temporary function to help me visualise the output before making a proper html file.
-    '''
-    import dash
-    from dash import dcc
-    from dash import html
-
-    app = dash.Dash()
-    app.layout = html.Div([
-        dcc.Graph(figure=fig)
-    ])
-
-    app.run_server(debug=True, use_reloader=False)  # Turn off reloader if inside Jupyter
 
 
 def main():
@@ -602,8 +719,8 @@ def main():
         sample2 = parse_query(args.query[0])
         # merge input dicts
         merged_data = merge_happy_query(sample1, sample2)
-        # make 4 arrays for snp, indel, het, hom plots, for each metric &
-        # make plot objects
+        # make 4 arrays for snp, indel, het, hom plots, for each metric
+        # & make plot objects
         plots = make_plots(merged_data, metrics)
     else:
         get_sample_names(args.query[0], args.query[1])
@@ -618,22 +735,16 @@ def main():
         merged_data = merge_samples(sample1, sample2, False)
         # make 4 arrays for snp, indel, het, hom plots
         plots = make_plots(merged_data, metrics, happy=False)
-    
+
     # generate output filename
     if args.happy:
         output = get_output_name([args.happy, args.query[0]])
     else:
         output = get_output_name(args.query, False)
 
-    # for each metric in plots list, add to report ????????
-    make_report(plots, output)
-
-    print(f'Type of plots: {type(plots)}')
-    make_html(plots[-2])
-
-    #for i in plots:
-    #    print(f'Type of individual: {type(i)}')
-    #    make_html(i)
+    # for each metric in plots list, add to report
+    html_output = make_html(plots)
+    make_report(html_output, output)
 
 
 if __name__ == "__main__":
