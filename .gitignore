@@ -128,9 +128,15 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# VCF test files
+# VCF test files & index files
 *.vcf
 *.vcf.gz
+*.tbi
+*.csi
 
 # HTML output
 *.html
+
+# Test txt files
+*.txt
+*.csv
