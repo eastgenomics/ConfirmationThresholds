@@ -253,6 +253,7 @@ def parse_query(query, happy=True):
             pos = record.POS
             ref = str(record.REF)
             # take only alt #1 (should only be one anyway)
+            assert len(record.ALT) == 1, 'multi allelic variant found'
             alt = str(record.ALT[0])
             variant = (f'{chrom}_{pos}_{ref}_{alt}')
             vcf_info = record.INFO
@@ -327,6 +328,8 @@ def infer_snp_indel(ref, alt):
     2 strings
     RETURN
     1 string
+
+    TODO: probably remove function and use pyvcf in parse_query for next version
     '''
     if ',' in alt:
         print(
@@ -609,7 +612,7 @@ def make_lists(data, metric, fptp, snp_indel=None, hethom=None):
             [k for k, v in data.items() if v['TPFP_or_samplename'] == fptp[1]
              and v['snp_indel'] == snp_indel]
         )
-    if hethom:
+    elif hethom:
         filtered_keys_1 = (
             [k for k, v in data.items() if v['TPFP_or_samplename'] == fptp[0]
              and v['HETHOM'] == hethom]
@@ -626,7 +629,7 @@ def make_lists(data, metric, fptp, snp_indel=None, hethom=None):
             [k for k, v in data.items() if v['TPFP_or_samplename'] == fptp[1]]
         )
     for item in filtered_keys_1:
-        # try to append metric value to array but catch occurrences where
+        # try to append metric value to list but catch occurrences where
         # metric is not present for that variant (usually metrics like
         # BaseQRankSum, ClippingRankSum, ExcessHet, etc.)
         try:
