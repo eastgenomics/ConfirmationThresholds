@@ -514,18 +514,21 @@ def make_arrays(data, metric, fptp, snp_indel=None, hethom=None):
     sample2) of relevant metric values for plotting, split according to
     category (SNP/INDEL, het/hom).
     '''
+    #for i in data:
+    #    print(type(data[i]['snp_indel']), data[i]['snp_indel'])
+
     array1 = [fptp[0]]
     array2 = [fptp[1]]
     if snp_indel:
         filtered_keys_1 = (
             [k for k, v in data.items() if v['TPFP_or_samplename'] == fptp[0]
-             and v['snp_indel'] == snp_indel]
+                and v['snp_indel'] == snp_indel]
         )
         filtered_keys_2 = (
             [k for k, v in data.items() if v['TPFP_or_samplename'] == fptp[1]
              and v['snp_indel'] == snp_indel]
         )
-    if hethom:
+    elif hethom:
         filtered_keys_1 = (
             [k for k, v in data.items() if v['TPFP_or_samplename'] == fptp[0]
              and v['HETHOM'] == hethom]
