@@ -719,7 +719,7 @@ def main():
         sample2 = parse_query(args.query[0])
         # merge input dicts
         merged_data = merge_happy_query(sample1, sample2)
-        # make 4 arrays for snp, indel, het, hom plots, for each metric
+        # make 4 lists for snp, indel, het, hom plots, for each metric
         # & make plot objects
         plots = make_plots(merged_data, metrics)
     else:
