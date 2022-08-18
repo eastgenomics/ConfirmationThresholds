@@ -1,0 +1,766 @@
+{
+    "test_query_dict": {
+        "1_949608_G_A": {
+            "info_AC": 2,
+            "info_AF": 1.0,
+            "info_AN": 2,
+            "info_DP": 21,
+            "info_ExcessHet": 3.0103,
+            "info_FS": 0.0,
+            "info_MLEAC": 2,
+            "info_MLEAF": 1.0,
+            "info_MQ": 26.41,
+            "info_QD": 28.85,
+            "info_SOR": 6.184,
+            "format_GT": "1/1",
+            "format_AD": [
+                0,
+                21
+            ],
+            "format_DP": 21,
+            "format_GQ": 63,
+            "format_PL": [
+                634,
+                63,
+                0
+            ]
+        },
+        "1_120612006_G_A": {
+            "info_AC": 2,
+            "info_AF": 1.0,
+            "info_AN": 2,
+            "info_BaseQRankSum": 1.022,
+            "info_ClippingRankSum": 0.0,
+            "info_DB": true,
+            "info_DP": 84,
+            "info_ExcessHet": 3.0103,
+            "info_FS": 6.938,
+            "info_MLEAC": 2,
+            "info_MLEAF": 1.0,
+            "info_MQ": 25.88,
+            "info_MQRankSum": -1.034,
+            "info_QD": 42.34,
+            "info_ReadPosRankSum": -0.664,
+            "info_SOR": 2.788,
+            "format_GT": "1/1",
+            "format_AD": [
+                1,
+                83
+            ],
+            "format_DP": 84,
+            "format_GQ": 99,
+            "format_PGT": "1|1",
+            "format_PID": "13116_T_G",
+            "format_PL": [
+                3585,
+                189,
+                0
+            ]
+        },
+        "1_14574_A_G": {
+            "info_AC": 1,
+            "info_AF": 0.5,
+            "info_AN": 2,
+            "info_BaseQRankSum": -4.914,
+            "info_ClippingRankSum": 0.0,
+            "info_DP": 61,
+            "info_ExcessHet": 3.0103,
+            "info_FS": 0.0,
+            "info_MLEAC": 1,
+            "info_MLEAF": 0.5,
+            "info_MQ": 27.88,
+            "info_MQRankSum": -6.387,
+            "info_QD": 7.63,
+            "info_ReadPosRankSum": -0.422,
+            "info_SOR": 0.298,
+            "format_GT": "0/1",
+            "format_AD": [
+                38,
+                22
+            ],
+            "format_DP": 60,
+            "format_GQ": 99,
+            "format_PL": [
+                486,
+                0,
+                1058
+            ]
+        },
+        "1_13838_C_T": {
+            "info_AC": 1,
+            "info_AF": 0.5,
+            "info_AN": 2,
+            "info_BaseQRankSum": -0.687,
+            "info_ClippingRankSum": 0.0,
+            "info_DB": true,
+            "info_DP": 35,
+            "info_ExcessHet": 3.0103,
+            "info_FS": 0.0,
+            "info_MLEAC": 1,
+            "info_MLEAF": 0.5,
+            "info_MQ": 28.39,
+            "info_MQRankSum": -1.352,
+            "info_QD": 2.36,
+            "info_ReadPosRankSum": 0.049,
+            "info_SOR": 0.148,
+            "format_GT": "0/1",
+            "format_AD": [
+                30,
+                5
+            ],
+            "format_DP": 35,
+            "format_GQ": 99,
+            "format_PGT": "0|1",
+            "format_PID": "13813_T_G",
+            "format_PL": [
+                111,
+                0,
+                1412
+            ]
+        },
+        "2_238244863_TGCA_T": {
+            "info_AC": 2,
+            "info_AF": 1.0,
+            "info_AN": 2,
+            "info_BaseQRankSum": -0.752,
+            "info_ClippingRankSum": 0.0,
+            "info_DB": true,
+            "info_DP": 79,
+            "info_ExcessHet": 3.0103,
+            "info_FS": 6.935,
+            "info_MLEAC": 2,
+            "info_MLEAF": 1.0,
+            "info_MQ": 25.57,
+            "info_MQRankSum": -1.147,
+            "info_QD": 45.02,
+            "info_ReadPosRankSum": -0.62,
+            "info_SOR": 2.788,
+            "format_GT": "1/1",
+            "format_AD": [
+                1,
+                78
+            ],
+            "format_DP": 79,
+            "format_GQ": 99,
+            "format_PGT": "1|1",
+            "format_PID": "13116_T_G",
+            "format_PL": [
+                3585,
+                189,
+                0
+            ]
+        },
+        "6_161152240_G_A": {
+            "info_AC": 2,
+            "info_AF": 1.0,
+            "info_AN": 2,
+            "info_BaseQRankSum": -3.811,
+            "info_ClippingRankSum": 0.0,
+            "info_DP": 107,
+            "info_ExcessHet": 3.0103,
+            "info_FS": 43.338,
+            "info_MLEAC": 2,
+            "info_MLEAF": 1.0,
+            "info_MQ": 23.82,
+            "info_MQRankSum": 0.165,
+            "info_QD": 38.17,
+            "info_ReadPosRankSum": -0.629,
+            "info_SOR": 3.196,
+            "format_GT": "1/1",
+            "format_AD": [
+                6,
+                99
+            ],
+            "format_DP": 105,
+            "format_GQ": 42,
+            "format_PL": [
+                4045,
+                42,
+                0
+            ]
+        },
+        "8_145738767_CG_C": {
+            "info_AC": 1,
+            "info_AF": 0.5,
+            "info_AN": 2,
+            "info_BaseQRankSum": 1.604,
+            "info_ClippingRankSum": 0.0,
+            "info_DP": 43,
+            "info_ExcessHet": 3.0103,
+            "info_FS": 0.0,
+            "info_MLEAC": 1,
+            "info_MLEAF": 0.5,
+            "info_MQ": 27.39,
+            "info_MQRankSum": -0.791,
+            "info_QD": 1.51,
+            "info_ReadPosRankSum": 1.061,
+            "info_SOR": 0.095,
+            "format_GT": "0/1",
+            "format_AD": [
+                38,
+                5
+            ],
+            "format_DP": 43,
+            "format_GQ": 93,
+            "format_PGT": "0|1",
+            "format_PID": "13813_T_G",
+            "format_PL": [
+                93,
+                0,
+                1577
+            ]
+        },
+        "11_68192690_G_A": {
+            "info_AC": 1,
+            "info_AF": 0.5,
+            "info_AN": 2,
+            "info_BaseQRankSum": 3.147,
+            "info_ClippingRankSum": 0.0,
+            "info_DP": 43,
+            "info_ExcessHet": 3.0103,
+            "info_FS": 0.0,
+            "info_MLEAC": 1,
+            "info_MLEAF": 0.5,
+            "info_MQ": 28.36,
+            "info_MQRankSum": -5.35,
+            "info_QD": 7.34,
+            "info_ReadPosRankSum": -0.285,
+            "info_SOR": 0.223,
+            "format_GT": "0/1",
+            "format_AD": [
+                29,
+                14
+            ],
+            "format_DP": 43,
+            "format_GQ": 99,
+            "format_PL": [
+                344,
+                0,
+                841
+            ]
+        },
+        "15_90210263_A_G": {
+            "info_AC": 1,
+            "info_AF": 0.5,
+            "info_AN": 2,
+            "info_BaseQRankSum": 4.908,
+            "info_ClippingRankSum": 0.0,
+            "info_DP": 63,
+            "info_ExcessHet": 3.0103,
+            "info_FS": 0.0,
+            "info_MLEAC": 1,
+            "info_MLEAF": 0.5,
+            "info_MQ": 27.77,
+            "info_MQRankSum": -3.548,
+            "info_QD": 0.55,
+            "info_ReadPosRankSum": -0.167,
+            "info_SOR": 0.033,
+            "format_GT": "0/1",
+            "format_AD": [
+                54,
+                9
+            ],
+            "format_DP": 63,
+            "format_GQ": 63,
+            "format_PL": [
+                63,
+                0,
+                2016
+            ]
+        },
+        "16_89167443_T_C": {
+            "info_AC": 1,
+            "info_AF": 0.5,
+            "info_AN": 2,
+            "info_BaseQRankSum": -5.087,
+            "info_ClippingRankSum": 0.0,
+            "info_DP": 64,
+            "info_ExcessHet": 3.0103,
+            "info_FS": 0.0,
+            "info_MLEAC": 1,
+            "info_MLEAF": 0.5,
+            "info_MQ": 27.76,
+            "info_MQRankSum": -6.212,
+            "info_QD": 11.97,
+            "info_ReadPosRankSum": 0.467,
+            "info_SOR": 0.252,
+            "format_GT": "0/1",
+            "format_AD": [
+                42,
+                22
+            ],
+            "format_DP": 64,
+            "format_GQ": 99,
+            "format_PGT": "0|1",
+            "format_PID": "14599_T_A",
+            "format_PL": [
+                794,
+                0,
+                1739
+            ]
+        },
+        "19_920642_T_A": {
+            "info_AC": 1,
+            "info_AF": 0.5,
+            "info_AN": 2,
+            "info_BaseQRankSum": 5.779,
+            "info_ClippingRankSum": 0.0,
+            "info_DP": 66,
+            "info_ExcessHet": 3.0103,
+            "info_FS": 0.0,
+            "info_MLEAC": 1,
+            "info_MLEAF": 0.5,
+            "info_MQ": 27.74,
+            "info_MQRankSum": -6.312,
+            "info_QD": 13.86,
+            "info_ReadPosRankSum": 0.783,
+            "info_SOR": 0.232,
+            "format_GT": "0/1",
+            "format_AD": [
+                44,
+                22
+            ],
+            "format_DP": 66,
+            "format_GQ": 99,
+            "format_PGT": "0|1",
+            "format_PID": "14599_T_A",
+            "format_PL": [
+                943,
+                0,
+                1769
+            ]
+        },
+        "21_47783796_T_C": {
+            "info_AC": 1,
+            "info_AF": 0.5,
+            "info_AN": 2,
+            "info_BaseQRankSum": 5.661,
+            "info_ClippingRankSum": 0.0,
+            "info_DP": 75,
+            "info_ExcessHet": 3.0103,
+            "info_FS": 4.127,
+            "info_MLEAC": 1,
+            "info_MLEAF": 0.5,
+            "info_MQ": 28.86,
+            "info_MQRankSum": -4.114,
+            "info_QD": 13.37,
+            "info_ReadPosRankSum": -0.719,
+            "info_SOR": 0.091,
+            "format_GT": "0/1",
+            "format_AD": [
+                46,
+                29
+            ],
+            "format_DP": 75,
+            "format_GQ": 99,
+            "format_PGT": "0|1",
+            "format_PID": "14599_T_A",
+            "format_PL": [
+                1031,
+                0,
+                1816
+            ]
+        }
+    },
+    "test_happy_dict": {
+        "1_949608_G_A": {
+            "TPFP_or_samplename": "TP",
+            "snp_indel": "SNP",
+            "HETHOM": "het"
+        },
+        "1_120612006_G_A": {
+            "TPFP_or_samplename": "UNK",
+            "snp_indel": "SNP",
+            "HETHOM": "het"
+        },
+        "2_238244863_TGCA_T": {
+            "TPFP_or_samplename": "TP",
+            "snp_indel": "INDEL",
+            "HETHOM": "het"
+        },
+        "6_161152240_G_A": {
+            "TPFP_or_samplename": "UNK",
+            "snp_indel": "SNP",
+            "HETHOM": "homalt"
+        },
+        "8_145738767_CG_C": {
+            "TPFP_or_samplename": "UNK",
+            "snp_indel": "INDEL",
+            "HETHOM": "homalt"
+        },
+        "11_68192690_G_A": {
+            "TPFP_or_samplename": "TP",
+            "snp_indel": "SNP",
+            "HETHOM": "het"
+        },
+        "15_90210263_A_G": {
+            "TPFP_or_samplename": "TP",
+            "snp_indel": "SNP",
+            "HETHOM": "het"
+        },
+        "16_89167443_T_C": {
+            "TPFP_or_samplename": "TP",
+            "snp_indel": "SNP",
+            "HETHOM": "homalt"
+        },
+        "19_920642_T_A": {
+            "TPFP_or_samplename": "TP",
+            "snp_indel": "SNP",
+            "HETHOM": "homalt"
+        },
+        "21_47783796_T_C": {
+            "TPFP_or_samplename": "TP",
+            "snp_indel": "SNP",
+            "HETHOM": "homalt"
+        }
+    },
+    "test_merged_dict": {
+        "1_949608_G_A": {
+            "TPFP_or_samplename": "TP",
+            "snp_indel": "SNP",
+            "HETHOM": "het",
+            "info_AC": 2,
+            "info_AF": 1.0,
+            "info_AN": 2,
+            "info_DP": 21,
+            "info_ExcessHet": 3.0103,
+            "info_FS": 0.0,
+            "info_MLEAC": 2,
+            "info_MLEAF": 1.0,
+            "info_MQ": 26.41,
+            "info_QD": 28.85,
+            "info_SOR": 6.184,
+            "format_GT": "1/1",
+            "format_AD": [
+                0,
+                21
+            ],
+            "format_DP": 21,
+            "format_GQ": 63,
+            "format_PL": [
+                634,
+                63,
+                0
+            ]
+        },
+        "1_120612006_G_A": {
+            "TPFP_or_samplename": "UNK",
+            "snp_indel": "SNP",
+            "HETHOM": "het",
+            "info_AC": 2,
+            "info_AF": 1.0,
+            "info_AN": 2,
+            "info_BaseQRankSum": 1.022,
+            "info_ClippingRankSum": 0.0,
+            "info_DB": true,
+            "info_DP": 84,
+            "info_ExcessHet": 3.0103,
+            "info_FS": 6.938,
+            "info_MLEAC": 2,
+            "info_MLEAF": 1.0,
+            "info_MQ": 25.88,
+            "info_MQRankSum": -1.034,
+            "info_QD": 42.34,
+            "info_ReadPosRankSum": -0.664,
+            "info_SOR": 2.788,
+            "format_GT": "1/1",
+            "format_AD": [
+                1,
+                83
+            ],
+            "format_DP": 84,
+            "format_GQ": 99,
+            "format_PGT": "1|1",
+            "format_PID": "13116_T_G",
+            "format_PL": [
+                3585,
+                189,
+                0
+            ]
+        },
+        "2_238244863_TGCA_T": {
+            "TPFP_or_samplename": "TP",
+            "snp_indel": "INDEL",
+            "HETHOM": "het",
+            "info_AC": 2,
+            "info_AF": 1.0,
+            "info_AN": 2,
+            "info_BaseQRankSum": -0.752,
+            "info_ClippingRankSum": 0.0,
+            "info_DB": true,
+            "info_DP": 79,
+            "info_ExcessHet": 3.0103,
+            "info_FS": 6.935,
+            "info_MLEAC": 2,
+            "info_MLEAF": 1.0,
+            "info_MQ": 25.57,
+            "info_MQRankSum": -1.147,
+            "info_QD": 45.02,
+            "info_ReadPosRankSum": -0.62,
+            "info_SOR": 2.788,
+            "format_GT": "1/1",
+            "format_AD": [
+                1,
+                78
+            ],
+            "format_DP": 79,
+            "format_GQ": 99,
+            "format_PGT": "1|1",
+            "format_PID": "13116_T_G",
+            "format_PL": [
+                3585,
+                189,
+                0
+            ]
+        },
+        "6_161152240_G_A": {
+            "TPFP_or_samplename": "UNK",
+            "snp_indel": "SNP",
+            "HETHOM": "homalt",
+            "info_AC": 2,
+            "info_AF": 1.0,
+            "info_AN": 2,
+            "info_BaseQRankSum": -3.811,
+            "info_ClippingRankSum": 0.0,
+            "info_DP": 107,
+            "info_ExcessHet": 3.0103,
+            "info_FS": 43.338,
+            "info_MLEAC": 2,
+            "info_MLEAF": 1.0,
+            "info_MQ": 23.82,
+            "info_MQRankSum": 0.165,
+            "info_QD": 38.17,
+            "info_ReadPosRankSum": -0.629,
+            "info_SOR": 3.196,
+            "format_GT": "1/1",
+            "format_AD": [
+                6,
+                99
+            ],
+            "format_DP": 105,
+            "format_GQ": 42,
+            "format_PL": [
+                4045,
+                42,
+                0
+            ]
+        },
+        "8_145738767_CG_C": {
+            "TPFP_or_samplename": "UNK",
+            "snp_indel": "INDEL",
+            "HETHOM": "homalt",
+            "info_AC": 1,
+            "info_AF": 0.5,
+            "info_AN": 2,
+            "info_BaseQRankSum": 1.604,
+            "info_ClippingRankSum": 0.0,
+            "info_DP": 43,
+            "info_ExcessHet": 3.0103,
+            "info_FS": 0.0,
+            "info_MLEAC": 1,
+            "info_MLEAF": 0.5,
+            "info_MQ": 27.39,
+            "info_MQRankSum": -0.791,
+            "info_QD": 1.51,
+            "info_ReadPosRankSum": 1.061,
+            "info_SOR": 0.095,
+            "format_GT": "0/1",
+            "format_AD": [
+                38,
+                5
+            ],
+            "format_DP": 43,
+            "format_GQ": 93,
+            "format_PGT": "0|1",
+            "format_PID": "13813_T_G",
+            "format_PL": [
+                93,
+                0,
+                1577
+            ]
+        },
+        "11_68192690_G_A": {
+            "TPFP_or_samplename": "TP",
+            "snp_indel": "SNP",
+            "HETHOM": "het",
+            "info_AC": 1,
+            "info_AF": 0.5,
+            "info_AN": 2,
+            "info_BaseQRankSum": 3.147,
+            "info_ClippingRankSum": 0.0,
+            "info_DP": 43,
+            "info_ExcessHet": 3.0103,
+            "info_FS": 0.0,
+            "info_MLEAC": 1,
+            "info_MLEAF": 0.5,
+            "info_MQ": 28.36,
+            "info_MQRankSum": -5.35,
+            "info_QD": 7.34,
+            "info_ReadPosRankSum": -0.285,
+            "info_SOR": 0.223,
+            "format_GT": "0/1",
+            "format_AD": [
+                29,
+                14
+            ],
+            "format_DP": 43,
+            "format_GQ": 99,
+            "format_PL": [
+                344,
+                0,
+                841
+            ]
+        },
+        "15_90210263_A_G": {
+            "TPFP_or_samplename": "TP",
+            "snp_indel": "SNP",
+            "HETHOM": "het",
+            "info_AC": 1,
+            "info_AF": 0.5,
+            "info_AN": 2,
+            "info_BaseQRankSum": 4.908,
+            "info_ClippingRankSum": 0.0,
+            "info_DP": 63,
+            "info_ExcessHet": 3.0103,
+            "info_FS": 0.0,
+            "info_MLEAC": 1,
+            "info_MLEAF": 0.5,
+            "info_MQ": 27.77,
+            "info_MQRankSum": -3.548,
+            "info_QD": 0.55,
+            "info_ReadPosRankSum": -0.167,
+            "info_SOR": 0.033,
+            "format_GT": "0/1",
+            "format_AD": [
+                54,
+                9
+            ],
+            "format_DP": 63,
+            "format_GQ": 63,
+            "format_PL": [
+                63,
+                0,
+                2016
+            ]
+        },
+        "16_89167443_T_C": {
+            "TPFP_or_samplename": "TP",
+            "snp_indel": "SNP",
+            "HETHOM": "homalt",
+            "info_AC": 1,
+            "info_AF": 0.5,
+            "info_AN": 2,
+            "info_BaseQRankSum": -5.087,
+            "info_ClippingRankSum": 0.0,
+            "info_DP": 64,
+            "info_ExcessHet": 3.0103,
+            "info_FS": 0.0,
+            "info_MLEAC": 1,
+            "info_MLEAF": 0.5,
+            "info_MQ": 27.76,
+            "info_MQRankSum": -6.212,
+            "info_QD": 11.97,
+            "info_ReadPosRankSum": 0.467,
+            "info_SOR": 0.252,
+            "format_GT": "0/1",
+            "format_AD": [
+                42,
+                22
+            ],
+            "format_DP": 64,
+            "format_GQ": 99,
+            "format_PGT": "0|1",
+            "format_PID": "14599_T_A",
+            "format_PL": [
+                794,
+                0,
+                1739
+            ]
+        },
+        "19_920642_T_A": {
+            "TPFP_or_samplename": "TP",
+            "snp_indel": "SNP",
+            "HETHOM": "homalt",
+            "info_AC": 1,
+            "info_AF": 0.5,
+            "info_AN": 2,
+            "info_BaseQRankSum": 5.779,
+            "info_ClippingRankSum": 0.0,
+            "info_DP": 66,
+            "info_ExcessHet": 3.0103,
+            "info_FS": 0.0,
+            "info_MLEAC": 1,
+            "info_MLEAF": 0.5,
+            "info_MQ": 27.74,
+            "info_MQRankSum": -6.312,
+            "info_QD": 13.86,
+            "info_ReadPosRankSum": 0.783,
+            "info_SOR": 0.232,
+            "format_GT": "0/1",
+            "format_AD": [
+                44,
+                22
+            ],
+            "format_DP": 66,
+            "format_GQ": 99,
+            "format_PGT": "0|1",
+            "format_PID": "14599_T_A",
+            "format_PL": [
+                943,
+                0,
+                1769
+            ]
+        },
+        "21_47783796_T_C": {
+            "TPFP_or_samplename": "TP",
+            "snp_indel": "SNP",
+            "HETHOM": "homalt",
+            "info_AC": 1,
+            "info_AF": 0.5,
+            "info_AN": 2,
+            "info_BaseQRankSum": 5.661,
+            "info_ClippingRankSum": 0.0,
+            "info_DP": 75,
+            "info_ExcessHet": 3.0103,
+            "info_FS": 4.127,
+            "info_MLEAC": 1,
+            "info_MLEAF": 0.5,
+            "info_MQ": 28.86,
+            "info_MQRankSum": -4.114,
+            "info_QD": 13.37,
+            "info_ReadPosRankSum": -0.719,
+            "info_SOR": 0.091,
+            "format_GT": "0/1",
+            "format_AD": [
+                46,
+                29
+            ],
+            "format_DP": 75,
+            "format_GQ": 99,
+            "format_PGT": "0|1",
+            "format_PID": "14599_T_A",
+            "format_PL": [
+                1031,
+                0,
+                1816
+            ]
+        }
+    },
+    "test_lists": [
+        [
+            "TP",
+            21.0,
+            79.0,
+            43.0,
+            63.0,
+            64.0,
+            66.0,
+            75.0
+        ],
+        [
+            "FP"
+        ]
+    ],
+    "test_figure": "Figure({\n    'data': [{'alignmentgroup': 'True',\n              'bingroup': 'x',\n              'hovertemplate': 'True/False Positive=TP<br>Bin=%{x}<extra></extra>',\n              'legendgroup': 'TP',\n              'marker': {'color': '#636efa', 'opacity': 0.5, 'pattern': {'shape': ''}},\n              'name': 'TP',\n              'offsetgroup': 'TP',\n              'orientation': 'v',\n              'showlegend': True,\n              'type': 'histogram',\n              'x': array([21., 79., 43., 63., 64., 66., 75.]),\n              'xaxis': 'x',\n              'yaxis': 'y'},\n             {'alignmentgroup': 'True',\n              'boxpoints': 'all',\n              'customdata': array([[ 14.29],\n                                   [100.  ],\n                                   [ 28.57],\n                                   [ 42.86],\n                                   [ 57.14],\n                                   [ 71.43],\n                                   [ 85.71]]),\n              'fillcolor': 'rgba(255,255,255,0)',\n              'hoveron': 'points',\n              'hovertemplate': '<br>Metric value=%{x}<br>Centile=%{customdata[0]}<br><extra></extra>',\n              'jitter': 0,\n              'legendgroup': 'TP',\n              'line': {'color': 'rgba(255,255,255,0)'},\n              'marker': {'color': '#636efa', 'symbol': 'line-ns-open'},\n              'name': 'TP',\n              'offsetgroup': 'TP',\n              'showlegend': False,\n              'type': 'box',\n              'x': array([21., 79., 43., 63., 64., 66., 75.]),\n              'xaxis': 'x2',\n              'yaxis': 'y2'}],\n    'layout': {'barmode': 'overlay',\n               'legend': {'title': {'text': 'TPFP'}, 'tracegroupgap': 0},\n               'margin': {'t': 60},\n               'template': '...',\n               'xaxis': {'anchor': 'y', 'domain': [0.0, 1.0], 'title': {'text': 'values'}},\n               'xaxis2': {'anchor': 'y2', 'domain': [0.0, 1.0], 'matches': 'x', 'showgrid': True, 'showticklabels': False},\n               'yaxis': {'anchor': 'x', 'domain': [0.0, 0.7326], 'title': {'text': 'count'}},\n               'yaxis2': {'anchor': 'x2',\n                          'domain': [0.7426, 1.0],\n                          'matches': 'y2',\n                          'showgrid': False,\n                          'showline': False,\n                          'showticklabels': False,\n                          'ticks': ''}}\n})",
+    "test_tiled_figure": "Figure({\n    'data': [{'alignmentgroup': 'True',\n              'bingroup': 'x',\n              'hovertemplate': 'True/False Positive=TP<br>Bin=%{x}<extra></extra>',\n              'legendgroup': 'TP',\n              'marker': {'color': '#636efa', 'opacity': 0.5, 'pattern': {'shape': ''}},\n              'name': 'TP',\n              'offsetgroup': 'TP',\n              'orientation': 'v',\n              'showlegend': True,\n              'type': 'histogram',\n              'x': array([2., 2., 2., 2., 2., 2., 2.]),\n              'xaxis': 'x',\n              'yaxis': 'y'},\n             {'alignmentgroup': 'True',\n              'boxpoints': 'all',\n              'customdata': array([[57.14],\n                                   [57.14],\n                                   [57.14],\n                                   [57.14],\n                                   [57.14],\n                                   [57.14],\n                                   [57.14]]),\n              'fillcolor': 'rgba(255,255,255,0)',\n              'hoveron': 'points',\n              'hovertemplate': '<br>Metric value=%{x}<br>Centile=%{customdata[0]}<br><extra></extra>',\n              'jitter': 0,\n              'legendgroup': 'TP',\n              'line': {'color': 'rgba(255,255,255,0)'},\n              'marker': {'color': '#636efa', 'symbol': 'line-ns-open'},\n              'name': 'TP',\n              'offsetgroup': 'TP',\n              'showlegend': False,\n              'type': 'box',\n              'x': array([2., 2., 2., 2., 2., 2., 2.]),\n              'xaxis': 'x',\n              'yaxis': 'y'},\n             {'alignmentgroup': 'True',\n              'bingroup': 'x',\n              'hovertemplate': 'True/False Positive=TP<br>Bin=%{x}<extra></extra>',\n              'legendgroup': 'TP',\n              'marker': {'color': '#636efa', 'opacity': 0.5, 'pattern': {'shape': ''}},\n              'name': 'TP',\n              'offsetgroup': 'TP',\n              'orientation': 'v',\n              'showlegend': True,\n              'type': 'histogram',\n              'x': array([2., 2., 2., 2., 2., 2., 2.]),\n              'xaxis': 'x2',\n              'yaxis': 'y2'},\n             {'alignmentgroup': 'True',\n              'boxpoints': 'all',\n              'customdata': array([[57.14],\n                                   [57.14],\n                                   [57.14],\n                                   [57.14],\n                                   [57.14],\n                                   [57.14],\n                                   [57.14]]),\n              'fillcolor': 'rgba(255,255,255,0)',\n              'hoveron': 'points',\n              'hovertemplate': '<br>Metric value=%{x}<br>Centile=%{customdata[0]}<br><extra></extra>',\n              'jitter': 0,\n              'legendgroup': 'TP',\n              'line': {'color': 'rgba(255,255,255,0)'},\n              'marker': {'color': '#636efa', 'symbol': 'line-ns-open'},\n              'name': 'TP',\n              'offsetgroup': 'TP',\n              'showlegend': False,\n              'type': 'box',\n              'x': array([2., 2., 2., 2., 2., 2., 2.]),\n              'xaxis': 'x2',\n              'yaxis': 'y2'},\n             {'alignmentgroup': 'True',\n              'bingroup': 'x',\n              'hovertemplate': 'True/False Positive=TP<br>Bin=%{x}<extra></extra>',\n              'legendgroup': 'TP',\n              'marker': {'color': '#636efa', 'opacity': 0.5, 'pattern': {'shape': ''}},\n              'name': 'TP',\n              'offsetgroup': 'TP',\n              'orientation': 'v',\n              'showlegend': True,\n              'type': 'histogram',\n              'x': array([2., 2., 2., 2.]),\n              'xaxis': 'x3',\n              'yaxis': 'y3'},\n             {'alignmentgroup': 'True',\n              'boxpoints': 'all',\n              'customdata': array([[62.5],\n                                   [62.5],\n                                   [62.5],\n                                   [62.5]]),\n              'fillcolor': 'rgba(255,255,255,0)',\n              'hoveron': 'points',\n              'hovertemplate': '<br>Metric value=%{x}<br>Centile=%{customdata[0]}<br><extra></extra>',\n              'jitter': 0,\n              'legendgroup': 'TP',\n              'line': {'color': 'rgba(255,255,255,0)'},\n              'marker': {'color': '#636efa', 'symbol': 'line-ns-open'},\n              'name': 'TP',\n              'offsetgroup': 'TP',\n              'showlegend': False,\n              'type': 'box',\n              'x': array([2., 2., 2., 2.]),\n              'xaxis': 'x3',\n              'yaxis': 'y3'},\n             {'alignmentgroup': 'True',\n              'bingroup': 'x',\n              'hovertemplate': 'True/False Positive=TP<br>Bin=%{x}<extra></extra>',\n              'legendgroup': 'TP',\n              'marker': {'color': '#636efa', 'opacity': 0.5, 'pattern': {'shape': ''}},\n              'name': 'TP',\n              'offsetgroup': 'TP',\n              'orientation': 'v',\n              'showlegend': True,\n              'type': 'histogram',\n              'x': array([2., 2., 2.]),\n              'xaxis': 'x4',\n              'yaxis': 'y4'},\n             {'alignmentgroup': 'True',\n              'boxpoints': 'all',\n              'customdata': array([[66.67],\n                                   [66.67],\n                                   [66.67]]),\n              'fillcolor': 'rgba(255,255,255,0)',\n              'hoveron': 'points',\n              'hovertemplate': '<br>Metric value=%{x}<br>Centile=%{customdata[0]}<br><extra></extra>',\n              'jitter': 0,\n              'legendgroup': 'TP',\n              'line': {'color': 'rgba(255,255,255,0)'},\n              'marker': {'color': '#636efa', 'symbol': 'line-ns-open'},\n              'name': 'TP',\n              'offsetgroup': 'TP',\n              'showlegend': False,\n              'type': 'box',\n              'x': array([2., 2., 2.]),\n              'xaxis': 'x4',\n              'yaxis': 'y4'}],\n    'layout': {'annotations': [{'font': {'size': 16},\n                                'showarrow': False,\n                                'text': 'SNP',\n                                'x': 0.10625,\n                                'xanchor': 'center',\n                                'xref': 'paper',\n                                'y': 1.0,\n                                'yanchor': 'bottom',\n                                'yref': 'paper'},\n                               {'font': {'size': 16},\n                                'showarrow': False,\n                                'text': 'INDEL',\n                                'x': 0.36875,\n                                'xanchor': 'center',\n                                'xref': 'paper',\n                                'y': 1.0,\n                                'yanchor': 'bottom',\n                                'yref': 'paper'},\n                               {'font': {'size': 16},\n                                'showarrow': False,\n                                'text': 'HET',\n                                'x': 0.6312500000000001,\n                                'xanchor': 'center',\n                                'xref': 'paper',\n                                'y': 1.0,\n                                'yanchor': 'bottom',\n                                'yref': 'paper'},\n                               {'font': {'size': 16},\n                                'showarrow': False,\n                                'text': 'HOM',\n                                'x': 0.89375,\n                                'xanchor': 'center',\n                                'xref': 'paper',\n                                'y': 1.0,\n                                'yanchor': 'bottom',\n                                'yref': 'paper'}],\n               'height': 500,\n               'hovermode': 'x unified',\n               'showlegend': False,\n               'template': '...',\n               'title': {'text': 'info_AN'},\n               'width': 1800,\n               'xaxis': {'anchor': 'y', 'domain': [0.0, 0.2125]},\n               'xaxis2': {'anchor': 'y2', 'domain': [0.2625, 0.475]},\n               'xaxis3': {'anchor': 'y3', 'domain': [0.525, 0.7375]},\n               'xaxis4': {'anchor': 'y4', 'domain': [0.7875, 1.0]},\n               'yaxis': {'anchor': 'x', 'domain': [0.0, 1.0]},\n               'yaxis2': {'anchor': 'x2', 'domain': [0.0, 1.0]},\n               'yaxis3': {'anchor': 'x3', 'domain': [0.0, 1.0]},\n               'yaxis4': {'anchor': 'x4', 'domain': [0.0, 1.0]}}\n})\n"
+}

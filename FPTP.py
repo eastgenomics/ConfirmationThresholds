@@ -6,16 +6,18 @@ Author: Chris Pyatt
 '''
 
 # import libraries
+# standard
 import argparse
-import re
-import sys
 import math
+import string
+import sys
+# 3rd party
 import numpy as np
 import pandas as pd
-import scipy.stats as st
-import plotly.io as pio
 import plotly.express as px
+import plotly.io as pio
 from plotly.subplots import make_subplots
+import scipy.stats as st
 import vcf
 
 
@@ -104,37 +106,42 @@ def get_sample_names(sample1, sample2):
     RETURN
     nothing
     '''
-    try:
-        global SAMPLE1_NAME
-        global SAMPLE2_NAME
-        SAMPLE1_NAME = re.split('[.-]', sample1)[0]
-        SAMPLE2_NAME = re.split('[.-]', sample2)[0]
-    except Exception as error:
-        print(
-            f'One of {sample1} or {sample2} does not match the expected '
-            'pattern. Expected something like samplename-metadata.vcf.gz'
-            f'Error: {error}'
-            )
-        sys.exit(1)
+    allowed = set(
+        string.ascii_lowercase + string.digits + string.ascii_uppercase
+        )
+    sample1_name = sample1.split('-')[0]
+    sample2_name = sample2.split('-')[0]
+    assert set(sample1_name) <= allowed, (
+        f'{sample1} does not match the expected pattern. Expected something '
+        'like samplename-some-metadata.vcf.gz where samplename contains only '
+        'alphanumeric characters.'
+        )
+    assert set(sample2_name) <= allowed, (
+        f'{sample2} does not match the expected pattern. Expected something '
+        'like samplename-some-metadata.vcf.gz where samplename contains only '
+        'alphanumeric characters.'
+        )
+    global SAMPLE1_NAME
+    global SAMPLE2_NAME
+    SAMPLE1_NAME = sample1_name
+    SAMPLE2_NAME = sample2_name
 
 
 def check_happy_query_match(happy, query):
     '''
     Checks that the sample name matches between hap.py VCF and query
     VCF (as variants will need to be matched between the two to assign TP/FP)
-    
+
     INPUT
     2 strings
     RETURN
     assertion error if not matching, otherwise True (boolean)
     '''
-    if happy:
-        assert happy == query, (
-            'hap.py and query vcf sample names do not '
-            f'match ({happy} & {query})'
-            )
-    else:
-        return True
+    assert happy == query, (
+        'hap.py and query vcf sample names do not '
+        f'match ({happy} & {query})'
+        )
+    return True
 
 
 def check_multiple_query_metrics(query, metrics):
@@ -181,7 +188,6 @@ def check_metrics(query, metrics):
             )
         sys.exit(1)
     try:
-
         vcf_reader = vcf.Reader(filename=query)
         # parse out metric names - separate info and format metrics in case
         # of identical names (usually DP)
@@ -281,7 +287,7 @@ def parse_query(query, happy=True):
                 metric_dict[name] = value
             # add format/genotype metrics to dictionary
             metric_dict.update(
-                {f'format_{i}': vcf_sample.get(i) for i in vcf_format}
+                {f'format_{i}': vcf_sample[i] for i in vcf_format}
             )
             variant_dict[variant] = metric_dict
     except Exception as error:
@@ -337,7 +343,7 @@ def infer_snp_indel(ref, alt):
             'VCF. Please provide normalised VCF data.'
             )
         sys.exit(1)
-    elif len(ref) == 1 or len(alt) == 1:
+    elif len(ref) == 1 and len(alt) == 1:
         snp_indel = 'SNP'
     else:
         snp_indel = 'INDEL'
