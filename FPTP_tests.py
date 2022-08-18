@@ -171,7 +171,7 @@ class TestModule(unittest.TestCase):
         '''
         self.assertEqual(
             str(FPTP.make_plots(test_merged_dict, ['info_DP'])),
-            [test_tiled_figure]
+            test_tiled_figure
             )
 
     def test_make_report(self):
@@ -179,7 +179,7 @@ class TestModule(unittest.TestCase):
         pass
 
     def test_make_tiled_figure(self):
-        # need 4 input plots...
+        # TODO - need to make 4 input plots (or maybe just reuse the same one 4 times...)
         pass
 
     def test_merge_happy_query(self):
