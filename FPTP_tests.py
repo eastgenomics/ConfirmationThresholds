@@ -154,8 +154,8 @@ class TestModule(unittest.TestCase):
         self.assertEqual(
             FPTP.make_lists(
                 test_merged_dict, 'info_DP', ['TP', 'FP'],
-                snp_indel='SNP'
-            ), [['TP', 21.0, 43.0, 63.0, 64.0, 66.0, 75.0], ['FP']]
+                snp_indel='SNP', hethom='het'
+            ), [['TP', 21.0, 43.0, 63.0], ['FP']]
             )
 
     def test_make_html(self):

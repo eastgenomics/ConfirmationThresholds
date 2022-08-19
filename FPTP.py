@@ -335,7 +335,7 @@ def infer_snp_indel(ref, alt):
     RETURN
     1 string
 
-    TODO: probably remove function and use pyvcf in parse_query for next version
+    TODO: probably remove func and use pyvcf in parse_query for next version
     '''
     if ',' in alt:
         print(
@@ -596,7 +596,7 @@ def merge_samples(sample1, sample2):
     return merged_dict
 
 
-def make_lists(data, metric, fptp, snp_indel=None, hethom=None):
+def make_lists(data, metric, fptp, snp_indel, hethom):
     '''
     Take merged dictionary, return two lists (happy vs query, or sample1 vs
     sample2) of relevant metric values for plotting, split according to
@@ -609,30 +609,18 @@ def make_lists(data, metric, fptp, snp_indel=None, hethom=None):
     '''
     list1 = [fptp[0]]
     list2 = [fptp[1]]
-    if snp_indel:
-        filtered_keys_1 = (
-            [k for k, v in data.items() if v['TPFP_or_samplename'] == fptp[0]
-             and v['snp_indel'] == snp_indel]
+    # multiallelic variants are labelled 'hetalt' in the happy vcf but they're
+    # still hets so capture that possibility
+    if hethom == 'het':
+        hethom = ['het', 'hetalt']
+    # do filtering
+    filtered_keys_1 = (
+        [k for k, v in data.items() if v['TPFP_or_samplename'] == fptp[0]
+         and v['snp_indel'] == snp_indel and v['HETHOM'] in hethom]
         )
-        filtered_keys_2 = (
-            [k for k, v in data.items() if v['TPFP_or_samplename'] == fptp[1]
-             and v['snp_indel'] == snp_indel]
-        )
-    elif hethom:
-        filtered_keys_1 = (
-            [k for k, v in data.items() if v['TPFP_or_samplename'] == fptp[0]
-             and v['HETHOM'] == hethom]
-        )
-        filtered_keys_2 = (
-            [k for k, v in data.items() if v['TPFP_or_samplename'] == fptp[1]
-             and v['HETHOM'] == hethom]
-        )
-    else:
-        filtered_keys_1 = (
-            [k for k, v in data.items() if v['TPFP_or_samplename'] == fptp[0]]
-        )
-        filtered_keys_2 = (
-            [k for k, v in data.items() if v['TPFP_or_samplename'] == fptp[1]]
+    filtered_keys_2 = (
+        [k for k, v in data.items() if v['TPFP_or_samplename'] == fptp[1]
+         and v['snp_indel'] == snp_indel and v['HETHOM'] in hethom]
         )
     for item in filtered_keys_1:
         # try to append metric value to list but catch occurrences where
@@ -666,19 +654,25 @@ def make_plots(data, metrics, happy=True):
         fptp = [SAMPLE1_NAME, SAMPLE2_NAME]
     for metric in metrics:
         # make filtered arrays for each variant category
-        snp_arrays = make_lists(data, metric, fptp, snp_indel='SNP')
-        indel_arrays = make_lists(data, metric, fptp, snp_indel='INDEL')
-        het_arrays = make_lists(data, metric, fptp, hethom='het')
-        hom_arrays = make_lists(data, metric, fptp, hethom='homalt')
-        # make plots for each category
-        snp_plot = create_plot(snp_arrays[0], snp_arrays[1])
-        indel_plot = create_plot(indel_arrays[0], indel_arrays[1])
-        het_plot = create_plot(het_arrays[0], het_arrays[1])
-        hom_plot = create_plot(hom_arrays[0], hom_arrays[1])
-        # make tiled figure with all of the above
-        fig = make_tiled_figure(
-            [snp_plot, indel_plot, het_plot, hom_plot], metric
+        snp_het = make_lists(
+            data, metric, fptp, snp_indel='SNP', hethom='het'
             )
+        snp_hom = make_lists(
+            data, metric, fptp, snp_indel='SNP', hethom='homalt'
+            )
+        indel_het = make_lists(
+            data, metric, fptp, snp_indel='INDEL', hethom='het'
+            )
+        indel_hom = make_lists(
+            data, metric, fptp, snp_indel='INDEL', hethom='homalt'
+            )
+        # make plots for each category
+        plot1 = create_plot(snp_het[0], snp_het[1])
+        plot2 = create_plot(snp_hom[0], snp_hom[1])
+        plot3 = create_plot(indel_het[0], indel_het[1])
+        plot4 = create_plot(indel_hom[0], indel_hom[1])
+        # make tiled figure with all of the above
+        fig = make_tiled_figure([plot1, plot2, plot3, plot4], metric)
         plot_list.append(fig)
     return plot_list
 
@@ -694,7 +688,7 @@ def make_tiled_figure(subfigs, metric):
     1 plotly figure object
     '''
     fig = make_subplots(rows=1, cols=4, subplot_titles=[
-        'SNP', 'INDEL', 'HET', 'HOM'])
+        'SNP_HET', 'SNP_HOM', 'INDEL_HET', 'INDEL_HOM'])
     # decide on position and add subfigures to plot
     for i, subfig in enumerate(subfigs):
         if subfig:
