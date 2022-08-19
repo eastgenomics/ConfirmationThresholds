@@ -31,7 +31,7 @@ SAMPLE2_NAME = ''
 def get_args():
     '''
     Parses command line arguments.
-    
+
     INPUT
     nothing
     RETURN
@@ -354,7 +354,7 @@ def parse_happy(happy):
     '''
     Takes a Hap.py output vcf containing TP & FP calls. Returns a dictionary
     of variants paired with TP/FP, SNP/INDEL, & het/hom status.
-    
+
     INPUT
     1 string (happy filename)
     RETURN
@@ -534,7 +534,7 @@ def make_html(plots):
 def make_report(html_string, outfile):
     '''
     Take html string (output of make_html) and save to output file
-    
+
     INPUT
     2 strings (one for html, one for output filename)
     RETURN
@@ -603,7 +603,7 @@ def make_lists(data, metric, fptp, snp_indel, hethom):
     category (SNP/INDEL, het/hom).
 
     INPUT
-    1 dictionary (of dictionaries), 1 string, 1 list, 2 optional strings
+    1 dictionary (of dictionaries), 1 string, 1 list, 2 strings
     RETURN
     1 list of lists
     '''
@@ -641,7 +641,7 @@ def make_lists(data, metric, fptp, snp_indel, hethom):
 def make_plots(data, metrics, happy=True):
     '''
     Take merged data and list of metrics. Return list of plot objects.
-    
+
     INPUT
     1 dictionary, 1 list, 1 optional boolean
     RETURN
@@ -653,7 +653,7 @@ def make_plots(data, metrics, happy=True):
     else:
         fptp = [SAMPLE1_NAME, SAMPLE2_NAME]
     for metric in metrics:
-        # make filtered arrays for each variant category
+        # make filtered lists for each variant category
         snp_het = make_lists(
             data, metric, fptp, snp_indel='SNP', hethom='het'
             )
@@ -681,7 +681,7 @@ def make_tiled_figure(subfigs, metric):
     '''
     Take list of figures (plotly plot objects) to be combined into
     tiled image. Return single figure object with tiled subplots.
-    
+
     INPUT
     1 list of plotly figure objects, 1 string
     RETURN
