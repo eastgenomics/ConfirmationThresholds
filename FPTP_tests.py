@@ -2,6 +2,7 @@ import FPTP
 import unittest
 import json
 import numpy as np
+import os
 
 # these test objects are correct as long as the test input files bundled with
 # the module are unchanged
@@ -12,8 +13,6 @@ test_happy_dict = test_data['test_happy_dict']
 test_query_dict = test_data['test_query_dict']
 test_merged_dict = test_data['test_merged_dict']
 test_lists = test_data['test_lists']
-test_figure = test_data['test_figure']
-test_tiled_figure = test_data['test_tiled_figure']
 
 
 class TestModule(unittest.TestCase):
@@ -80,9 +79,9 @@ class TestModule(unittest.TestCase):
         Check that create_plot() returns a plotly figure object matching
         the example.
         '''
-        self.assertEqual(
-            str(FPTP.create_plot(test_lists[0], test_lists[1])), test_figure
-            )
+        # discussed with Matt - can't test something so big as no orthogonal
+        # method for making the example
+        pass
 
     def test_decide_bins(self):
         # not implemented yet (multiple samples)
@@ -160,26 +159,27 @@ class TestModule(unittest.TestCase):
             )
 
     def test_make_html(self):
+        # apparently validating html is hard
         pass
 
     def test_make_plots(self):
         '''
         Check that make_plots() returns a plotly figure object matching the
         example
-
-        TODO - string matching might not work here so investigate other options
         '''
-        self.assertEqual(
-            str(FPTP.make_plots(test_merged_dict, ['info_DP'])),
-            test_tiled_figure
-            )
-
-    def test_make_report(self):
-        # how to test that it writes to file without writing to file?
+        # discussed with Matt - can't test something so big as no orthogonal
+        # method for making the example
         pass
 
+    def test_make_report(self):
+        FPTP.make_report('Test_String', 'Test_file')
+        with open('Test_file', 'r') as t:
+            self.assertEqual(t.readlines()[0], 'Test_String')
+        os.remove('Test_file')
+
     def test_make_tiled_figure(self):
-        # TODO - need to make 4 input plots (or maybe just reuse the same one 4 times...)
+        # TODO - need to make 4 input plots (or maybe just reuse the same
+        # one 4 times...)
         pass
 
     def test_merge_happy_query(self):
