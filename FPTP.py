@@ -9,6 +9,7 @@ Author: Chris Pyatt
 # standard
 import argparse
 import math
+import re
 import string
 import sys
 # 3rd party
@@ -109,8 +110,8 @@ def get_sample_names(sample1, sample2):
     allowed = set(
         string.ascii_lowercase + string.digits + string.ascii_uppercase
         )
-    sample1_name = sample1.split('-')[0]
-    sample2_name = sample2.split('-')[0]
+    sample1_name = re.split('[.-]', sample1)[0]
+    sample2_name = re.split('[.-]', sample2)[0]
     assert set(sample1_name) <= allowed, (
         f'{sample1} does not match the expected pattern. Expected something '
         'like samplename-some-metadata.vcf.gz where samplename contains only '
@@ -258,8 +259,8 @@ def parse_query(query, happy=True):
             chrom = record.CHROM
             pos = record.POS
             ref = str(record.REF)
-            # take only alt #1 (should only be one anyway)
-            assert len(record.ALT) == 1, 'multi allelic variant found'
+            # take only alt #1 (should only be one anyway) - not worried as
+            # alt not used except for dict key
             alt = str(record.ALT[0])
             variant = (f'{chrom}_{pos}_{ref}_{alt}')
             vcf_info = record.INFO
@@ -420,6 +421,59 @@ def calculate_centiles(vals):
     return np.array(centiles)
 
 
+def icreate_plot(plot_list, metric):
+    '''
+    Given a list of plot datasets, make a tiled image of all the datasets
+    as histograms.
+
+    INPUT
+    1 list of lists (each with 2 data lists)
+    RETURN
+    1 plotly figure object
+    '''
+    values = []
+    centiles = []
+    tpfp = []
+    subset = []
+    for plot in plot_list:
+        plot_name = plot[-1]
+        list1 = plot[0]
+        list2 = plot[1]
+        label1 = list1.pop(0)
+        label2 = list2.pop(0)
+        values = values + (list1 + list2)
+        centiles = centiles + (
+            list(calculate_centiles(list1)) + list(calculate_centiles(list2))
+            )
+        tpfp = tpfp + (([label1] * len(list1)) + ([label2] * len(list2)))
+        subset = subset + ([plot_name] * len(list1 + list2))
+    df = pd.DataFrame(
+        {'Metric Value': values, 'TPFP': tpfp, 'Centile': centiles,
+         'Variant Type': subset}
+        )
+    fig = px.histogram(
+        df, x='Metric Value', color='TPFP', facet_col='Variant Type',
+        hover_data=[df.columns[2]], marginal='rug', barmode='overlay'
+        )
+    for i, trace in enumerate(fig['data']):
+        group = trace['legendgroup']
+        if i % 2 == 0:
+            trace['hovertemplate'] = (
+                f'True/False Positive={group}<br>'
+                'Bin=%{x}<br>Count=%{y}<extra></extra>'
+                )
+        else:
+            trace['hovertemplate'] = (
+                '<br>Metric value=%{x}<br>'
+                'Centile=%{customdata[0]}<br><extra></extra>'
+                )
+    fig.update_layout(hovermode='x unified')
+    fig.update_layout(
+        height=700, width=2000, title_text=metric, showlegend=False
+        )
+    return fig
+
+
 def create_plot(list1, list2):
     '''
     Given two lists of metric values, plot corresponding distributions and
@@ -460,13 +514,14 @@ def create_plot(list1, list2):
         if i % 2 == 0:
             trace['hovertemplate'] = (
                 f'True/False Positive={group}<br>'
-                'Bin=%{x}<extra></extra>'
+                'Bin=%{x}<br>Count=%{y}<extra></extra>'
                 )
         else:
             trace['hovertemplate'] = (
                 '<br>Metric value=%{x}<br>'
                 'Centile=%{customdata[0]}<br><extra></extra>'
                 )
+    fig.show()
     return fig
 
 
@@ -666,13 +721,13 @@ def make_plots(data, metrics, happy=True):
         indel_hom = make_lists(
             data, metric, fptp, snp_indel='INDEL', hethom='homalt'
             )
-        # make plots for each category
-        plot1 = create_plot(snp_het[0], snp_het[1])
-        plot2 = create_plot(snp_hom[0], snp_hom[1])
-        plot3 = create_plot(indel_het[0], indel_het[1])
-        plot4 = create_plot(indel_hom[0], indel_hom[1])
-        # make tiled figure with all of the above
-        fig = make_tiled_figure([plot1, plot2, plot3, plot4], metric)
+        # add label as another list item
+        snp_het.append('snp_het')
+        snp_hom.append('snp_hom')
+        indel_het.append('indel_het')
+        indel_hom.append('indel_hom')
+        # make tiled figure
+        fig = icreate_plot([snp_het, snp_hom, indel_het, indel_hom], metric)
         plot_list.append(fig)
     return plot_list
 
