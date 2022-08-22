@@ -416,25 +416,32 @@ def calculate_centiles(vals):
     1 list
     RETURN
     1 numpy array
+
+    TODO - return list instead as I'm just converting it in create_plot()
+    anyway
     '''
     centiles = [round(st.percentileofscore(vals, i), 2) for i in vals]
     return np.array(centiles)
 
 
-def icreate_plot(plot_list, metric):
+def create_plot(plot_list, metric):
     '''
     Given a list of plot datasets, make a tiled image of all the datasets
     as histograms.
 
     INPUT
-    1 list of lists (each with 2 data lists)
+    1 list of lists (each with 2 data lists and a filter label), one string
     RETURN
     1 plotly figure object
     '''
+    # initialise concat lists
     values = []
     centiles = []
     tpfp = []
     subset = []
+    # for each dataset, grab the labels (TP/FP - need to be separated from the
+    # main data) and filter (e.g. snp_het), then append to the relevant
+    # concatenated lists initialised above
     for plot in plot_list:
         plot_name = plot[-1]
         list1 = plot[0]
@@ -447,14 +454,18 @@ def icreate_plot(plot_list, metric):
             )
         tpfp = tpfp + (([label1] * len(list1)) + ([label2] * len(list2)))
         subset = subset + ([plot_name] * len(list1 + list2))
+    # make dataframe using lists above for columns
     df = pd.DataFrame(
         {'Metric Value': values, 'TPFP': tpfp, 'Centile': centiles,
          'Variant Type': subset}
         )
+    # make figure (facet_col tiles the datasets based on filter subset)
     fig = px.histogram(
         df, x='Metric Value', color='TPFP', facet_col='Variant Type',
         hover_data=[df.columns[2]], marginal='rug', barmode='overlay'
         )
+    # format the hovertext to display centiles only on the rug plot and counts
+    # only on the histogram (rug plots have odd index in histogram)
     for i, trace in enumerate(fig['data']):
         group = trace['legendgroup']
         if i % 2 == 0:
@@ -467,61 +478,12 @@ def icreate_plot(plot_list, metric):
                 '<br>Metric value=%{x}<br>'
                 'Centile=%{customdata[0]}<br><extra></extra>'
                 )
+    # add vertical line to hover action
     fig.update_layout(hovermode='x unified')
+    # specify figure dimensions and titles
     fig.update_layout(
         height=700, width=2000, title_text=metric, showlegend=False
         )
-    return fig
-
-
-def create_plot(list1, list2):
-    '''
-    Given two lists of metric values, plot corresponding distributions and
-    return plot object.
-
-    INPUT
-    2 lists
-    RETURN
-    1 plotly figure object
-    '''
-    # grab labels (TP/FP or samplename) to make column below
-    # uses pop() as string label needs separating from int values
-    label1 = list1.pop(0)
-    label2 = list2.pop(0)
-    # make combined df column
-    values = list1 + list2
-    # calculate centiles for each entry in the arrays (displayed silently)
-    # and turn into column for dataframe (same order as values)
-    centiles = list(
-        calculate_centiles(list1)
-        ) + list(
-            calculate_centiles(list2)
-            )
-    # make TPFP column for dataframe
-    TPFP = ([label1] * len(list1)) + ([label2] * len(list2))
-    # make dataframe
-    df = pd.DataFrame(
-        {'values': values, 'TPFP': TPFP, 'centiles': centiles}
-        )
-    fig = px.histogram(
-        df, x='values', color='TPFP',
-        hover_data=[df.columns[2]], marginal='rug', barmode='overlay'
-        )
-    # set format for hovertext using hovertemplate (even index = histogram,
-    # odd index = rug)
-    for i, trace in enumerate(fig['data']):
-        group = trace['legendgroup']
-        if i % 2 == 0:
-            trace['hovertemplate'] = (
-                f'True/False Positive={group}<br>'
-                'Bin=%{x}<br>Count=%{y}<extra></extra>'
-                )
-        else:
-            trace['hovertemplate'] = (
-                '<br>Metric value=%{x}<br>'
-                'Centile=%{customdata[0]}<br><extra></extra>'
-                )
-    fig.show()
     return fig
 
 
@@ -566,9 +528,9 @@ def make_html(plots):
         '.min.js"></script></head><body>'
         '<h1>QC True/False Positive Distributions</h1>'
         '<h4>Each metric requested is plotted below, with separate'
-        ' plots for SNP, INDEL, HET, & HOM variants. Each axis '
-        'contains a histogram distribution of the metric values for'
-        ' that group, plus a rug plot along the bottom showing all '
+        ' plots for SNP_HET, SNP_HOM, INDEL_HET, & INDEL_HOM variants. Each '
+        'axis contains a histogram distribution of the metric values for'
+        ' that group, plus a rug plot along the top showing all '
         'datapoints. Hover over the rug plot to get information'
         ' about the metric value at that point and the centile that'
         ' value represents within the data used to generate this '
@@ -727,34 +689,9 @@ def make_plots(data, metrics, happy=True):
         indel_het.append('indel_het')
         indel_hom.append('indel_hom')
         # make tiled figure
-        fig = icreate_plot([snp_het, snp_hom, indel_het, indel_hom], metric)
+        fig = create_plot([snp_het, snp_hom, indel_het, indel_hom], metric)
         plot_list.append(fig)
     return plot_list
-
-
-def make_tiled_figure(subfigs, metric):
-    '''
-    Take list of figures (plotly plot objects) to be combined into
-    tiled image. Return single figure object with tiled subplots.
-
-    INPUT
-    1 list of plotly figure objects, 1 string
-    RETURN
-    1 plotly figure object
-    '''
-    fig = make_subplots(rows=1, cols=4, subplot_titles=[
-        'SNP_HET', 'SNP_HOM', 'INDEL_HET', 'INDEL_HOM'])
-    # decide on position and add subfigures to plot
-    for i, subfig in enumerate(subfigs):
-        if subfig:
-            for trace in subfig.data:
-                fig.add_trace(trace, row=1, col=i+1)
-                fig.update_layout(hovermode='x unified')
-    # specify plot size and title
-    fig.update_layout(
-        height=500, width=1800, title_text=metric, showlegend=False
-        )
-    return fig
 
 
 def main():
