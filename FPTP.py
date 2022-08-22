@@ -189,7 +189,6 @@ def check_metrics(query, metrics):
             )
         sys.exit(1)
     try:
-
         vcf_reader = vcf.Reader(filename=query)
         # parse out metric names - separate info and format metrics in case
         # of identical names (usually DP)
