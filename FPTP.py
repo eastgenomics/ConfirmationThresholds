@@ -6,16 +6,19 @@ Author: Chris Pyatt
 '''
 
 # import libraries
+# standard
 import argparse
-import re
-import sys
 import math
+import re
+import string
+import sys
+# 3rd party
 import numpy as np
 import pandas as pd
-import scipy.stats as st
-import plotly.io as pio
 import plotly.express as px
+import plotly.io as pio
 from plotly.subplots import make_subplots
+import scipy.stats as st
 import vcf
 
 
@@ -29,7 +32,7 @@ SAMPLE2_NAME = ''
 def get_args():
     '''
     Parses command line arguments.
-    
+
     INPUT
     nothing
     RETURN
@@ -104,37 +107,42 @@ def get_sample_names(sample1, sample2):
     RETURN
     nothing
     '''
-    try:
-        global SAMPLE1_NAME
-        global SAMPLE2_NAME
-        SAMPLE1_NAME = re.split('[.-]', sample1)[0]
-        SAMPLE2_NAME = re.split('[.-]', sample2)[0]
-    except Exception as error:
-        print(
-            f'One of {sample1} or {sample2} does not match the expected '
-            'pattern. Expected something like samplename-metadata.vcf.gz'
-            f'Error: {error}'
-            )
-        sys.exit(1)
+    allowed = set(
+        string.ascii_lowercase + string.digits + string.ascii_uppercase
+        )
+    sample1_name = re.split('[.-]', sample1)[0]
+    sample2_name = re.split('[.-]', sample2)[0]
+    assert set(sample1_name) <= allowed, (
+        f'{sample1} does not match the expected pattern. Expected something '
+        'like samplename-some-metadata.vcf.gz where samplename contains only '
+        'alphanumeric characters.'
+        )
+    assert set(sample2_name) <= allowed, (
+        f'{sample2} does not match the expected pattern. Expected something '
+        'like samplename-some-metadata.vcf.gz where samplename contains only '
+        'alphanumeric characters.'
+        )
+    global SAMPLE1_NAME
+    global SAMPLE2_NAME
+    SAMPLE1_NAME = sample1_name
+    SAMPLE2_NAME = sample2_name
 
 
 def check_happy_query_match(happy, query):
     '''
     Checks that the sample name matches between hap.py VCF and query
     VCF (as variants will need to be matched between the two to assign TP/FP)
-    
+
     INPUT
     2 strings
     RETURN
     assertion error if not matching, otherwise True (boolean)
     '''
-    if happy:
-        assert happy == query, (
-            'hap.py and query vcf sample names do not '
-            f'match ({happy} & {query})'
-            )
-    else:
-        return True
+    assert happy == query, (
+        'hap.py and query vcf sample names do not '
+        f'match ({happy} & {query})'
+        )
+    return True
 
 
 def check_multiple_query_metrics(query, metrics):
@@ -252,8 +260,8 @@ def parse_query(query, happy=True):
             chrom = record.CHROM
             pos = record.POS
             ref = str(record.REF)
-            # take only alt #1 (should only be one anyway)
-            assert len(record.ALT) == 1, 'multi allelic variant found'
+            # take only alt #1 (should only be one anyway) - not worried as
+            # alt not used except for dict key
             alt = str(record.ALT[0])
             variant = (f'{chrom}_{pos}_{ref}_{alt}')
             vcf_info = record.INFO
@@ -281,7 +289,7 @@ def parse_query(query, happy=True):
                 metric_dict[name] = value
             # add format/genotype metrics to dictionary
             metric_dict.update(
-                {f'format_{i}': vcf_sample.get(i) for i in vcf_format}
+                {f'format_{i}': vcf_sample[i] for i in vcf_format}
             )
             variant_dict[variant] = metric_dict
     except Exception as error:
@@ -329,7 +337,7 @@ def infer_snp_indel(ref, alt):
     RETURN
     1 string
 
-    TODO: probably remove function and use pyvcf in parse_query for next version
+    TODO: probably remove func and use pyvcf in parse_query for next version
     '''
     if ',' in alt:
         print(
@@ -348,7 +356,7 @@ def parse_happy(happy):
     '''
     Takes a Hap.py output vcf containing TP & FP calls. Returns a dictionary
     of variants paired with TP/FP, SNP/INDEL, & het/hom status.
-    
+
     INPUT
     1 string (happy filename)
     RETURN
@@ -409,58 +417,74 @@ def calculate_centiles(vals):
     1 list
     RETURN
     1 numpy array
+
+    TODO - return list instead as I'm just converting it in create_plot()
+    anyway
     '''
     centiles = [round(st.percentileofscore(vals, i), 2) for i in vals]
     return np.array(centiles)
 
 
-def create_plot(list1, list2):
+def create_plot(plot_list, metric):
     '''
-    Given two lists of metric values, plot corresponding distributions and
-    return plot object.
+    Given a list of plot datasets, make a tiled image of all the datasets
+    as histograms.
 
     INPUT
-    2 lists
+    1 list of lists (each with 2 data lists and a filter label), one string
     RETURN
     1 plotly figure object
     '''
-    # grab labels (TP/FP or samplename) to make column below
-    # uses pop() as string label needs separating from int values
-    label1 = list1.pop(0)
-    label2 = list2.pop(0)
-    # make combined df column
-    values = list1 + list2
-    # calculate centiles for each entry in the arrays (displayed silently)
-    # and turn into column for dataframe (same order as values)
-    centiles = list(
-        calculate_centiles(list1)
-        ) + list(
-            calculate_centiles(list2)
+    # initialise concat lists
+    values = []
+    centiles = []
+    tpfp = []
+    subset = []
+    # for each dataset, grab the labels (TP/FP - need to be separated from the
+    # main data) and filter (e.g. snp_het), then append to the relevant
+    # concatenated lists initialised above
+    for plot in plot_list:
+        plot_name = plot[-1]
+        list1 = plot[0]
+        list2 = plot[1]
+        label1 = list1.pop(0)
+        label2 = list2.pop(0)
+        values = values + (list1 + list2)
+        centiles = centiles + (
+            list(calculate_centiles(list1)) + list(calculate_centiles(list2))
             )
-    # make TPFP column for dataframe
-    TPFP = ([label1] * len(list1)) + ([label2] * len(list2))
-    # make dataframe
+        tpfp = tpfp + (([label1] * len(list1)) + ([label2] * len(list2)))
+        subset = subset + ([plot_name] * len(list1 + list2))
+    # make dataframe using lists above for columns
     df = pd.DataFrame(
-        {'values': values, 'TPFP': TPFP, 'centiles': centiles}
+        {'Metric Value': values, 'TPFP': tpfp, 'Centile': centiles,
+         'Variant Type': subset}
         )
+    # make figure (facet_col tiles the datasets based on filter subset)
     fig = px.histogram(
-        df, x='values', color='TPFP',
+        df, x='Metric Value', color='TPFP', facet_col='Variant Type',
         hover_data=[df.columns[2]], marginal='rug', barmode='overlay'
         )
-    # set format for hovertext using hovertemplate (even index = histogram,
-    # odd index = rug)
+    # format the hovertext to display centiles only on the rug plot and counts
+    # only on the histogram (rug plots have odd index in histogram)
     for i, trace in enumerate(fig['data']):
         group = trace['legendgroup']
         if i % 2 == 0:
             trace['hovertemplate'] = (
                 f'True/False Positive={group}<br>'
-                'Bin=%{x}<extra></extra>'
+                'Bin=%{x}<br>Count=%{y}<extra></extra>'
                 )
         else:
             trace['hovertemplate'] = (
                 '<br>Metric value=%{x}<br>'
                 'Centile=%{customdata[0]}<br><extra></extra>'
                 )
+    # add vertical line to hover action
+    fig.update_layout(hovermode='x unified')
+    # specify figure dimensions and titles
+    fig.update_layout(
+        height=700, width=2000, title_text=metric, showlegend=False
+        )
     return fig
 
 
@@ -505,9 +529,9 @@ def make_html(plots):
         '.min.js"></script></head><body>'
         '<h1>QC True/False Positive Distributions</h1>'
         '<h4>Each metric requested is plotted below, with separate'
-        ' plots for SNP, INDEL, HET, & HOM variants. Each axis '
-        'contains a histogram distribution of the metric values for'
-        ' that group, plus a rug plot along the bottom showing all '
+        ' plots for SNP_HET, SNP_HOM, INDEL_HET, & INDEL_HOM variants. Each '
+        'axis contains a histogram distribution of the metric values for'
+        ' that group, plus a rug plot along the top showing all '
         'datapoints. Hover over the rug plot to get information'
         ' about the metric value at that point and the centile that'
         ' value represents within the data used to generate this '
@@ -528,7 +552,7 @@ def make_html(plots):
 def make_report(html_string, outfile):
     '''
     Take html string (output of make_html) and save to output file
-    
+
     INPUT
     2 strings (one for html, one for output filename)
     RETURN
@@ -590,43 +614,31 @@ def merge_samples(sample1, sample2):
     return merged_dict
 
 
-def make_lists(data, metric, fptp, snp_indel=None, hethom=None):
+def make_lists(data, metric, fptp, snp_indel, hethom):
     '''
     Take merged dictionary, return two lists (happy vs query, or sample1 vs
     sample2) of relevant metric values for plotting, split according to
     category (SNP/INDEL, het/hom).
 
     INPUT
-    1 dictionary (of dictionaries), 1 string, 1 list, 2 optional strings
+    1 dictionary (of dictionaries), 1 string, 1 list, 2 strings
     RETURN
     1 list of lists
     '''
     list1 = [fptp[0]]
     list2 = [fptp[1]]
-    if snp_indel:
-        filtered_keys_1 = (
-            [k for k, v in data.items() if v['TPFP_or_samplename'] == fptp[0]
-             and v['snp_indel'] == snp_indel]
+    # multiallelic variants are labelled 'hetalt' in the happy vcf but they're
+    # still hets so capture that possibility
+    if hethom == 'het':
+        hethom = ['het', 'hetalt']
+    # do filtering
+    filtered_keys_1 = (
+        [k for k, v in data.items() if v['TPFP_or_samplename'] == fptp[0]
+         and v['snp_indel'] == snp_indel and v['HETHOM'] in hethom]
         )
-        filtered_keys_2 = (
-            [k for k, v in data.items() if v['TPFP_or_samplename'] == fptp[1]
-             and v['snp_indel'] == snp_indel]
-        )
-    elif hethom:
-        filtered_keys_1 = (
-            [k for k, v in data.items() if v['TPFP_or_samplename'] == fptp[0]
-             and v['HETHOM'] == hethom]
-        )
-        filtered_keys_2 = (
-            [k for k, v in data.items() if v['TPFP_or_samplename'] == fptp[1]
-             and v['HETHOM'] == hethom]
-        )
-    else:
-        filtered_keys_1 = (
-            [k for k, v in data.items() if v['TPFP_or_samplename'] == fptp[0]]
-        )
-        filtered_keys_2 = (
-            [k for k, v in data.items() if v['TPFP_or_samplename'] == fptp[1]]
+    filtered_keys_2 = (
+        [k for k, v in data.items() if v['TPFP_or_samplename'] == fptp[1]
+         and v['snp_indel'] == snp_indel and v['HETHOM'] in hethom]
         )
     for item in filtered_keys_1:
         # try to append metric value to list but catch occurrences where
@@ -647,7 +659,7 @@ def make_lists(data, metric, fptp, snp_indel=None, hethom=None):
 def make_plots(data, metrics, happy=True):
     '''
     Take merged data and list of metrics. Return list of plot objects.
-    
+
     INPUT
     1 dictionary, 1 list, 1 optional boolean
     RETURN
@@ -659,47 +671,28 @@ def make_plots(data, metrics, happy=True):
     else:
         fptp = [SAMPLE1_NAME, SAMPLE2_NAME]
     for metric in metrics:
-        # make filtered arrays for each variant category
-        snp_arrays = make_lists(data, metric, fptp, snp_indel='SNP')
-        indel_arrays = make_lists(data, metric, fptp, snp_indel='INDEL')
-        het_arrays = make_lists(data, metric, fptp, hethom='het')
-        hom_arrays = make_lists(data, metric, fptp, hethom='homalt')
-        # make plots for each category
-        snp_plot = create_plot(snp_arrays[0], snp_arrays[1])
-        indel_plot = create_plot(indel_arrays[0], indel_arrays[1])
-        het_plot = create_plot(het_arrays[0], het_arrays[1])
-        hom_plot = create_plot(hom_arrays[0], hom_arrays[1])
-        # make tiled figure with all of the above
-        fig = make_tiled_figure(
-            [snp_plot, indel_plot, het_plot, hom_plot], metric
+        # make filtered lists for each variant category
+        snp_het = make_lists(
+            data, metric, fptp, snp_indel='SNP', hethom='het'
             )
+        snp_hom = make_lists(
+            data, metric, fptp, snp_indel='SNP', hethom='homalt'
+            )
+        indel_het = make_lists(
+            data, metric, fptp, snp_indel='INDEL', hethom='het'
+            )
+        indel_hom = make_lists(
+            data, metric, fptp, snp_indel='INDEL', hethom='homalt'
+            )
+        # add label as another list item
+        snp_het.append('snp_het')
+        snp_hom.append('snp_hom')
+        indel_het.append('indel_het')
+        indel_hom.append('indel_hom')
+        # make tiled figure
+        fig = create_plot([snp_het, snp_hom, indel_het, indel_hom], metric)
         plot_list.append(fig)
     return plot_list
-
-
-def make_tiled_figure(subfigs, metric):
-    '''
-    Take list of figures (plotly plot objects) to be combined into
-    tiled image. Return single figure object with tiled subplots.
-    
-    INPUT
-    1 list of plotly figure objects, 1 string
-    RETURN
-    1 plotly figure object
-    '''
-    fig = make_subplots(rows=1, cols=4, subplot_titles=[
-        'SNP', 'INDEL', 'HET', 'HOM'])
-    # decide on position and add subfigures to plot
-    for i, subfig in enumerate(subfigs):
-        if subfig:
-            for trace in subfig.data:
-                fig.add_trace(trace, row=1, col=i+1)
-                fig.update_layout(hovermode='x unified')
-    # specify plot size and title
-    fig.update_layout(
-        height=500, width=1800, title_text=metric, showlegend=False
-        )
-    return fig
 
 
 def main():
@@ -719,7 +712,7 @@ def main():
         sample2 = parse_query(args.query[0])
         # merge input dicts
         merged_data = merge_happy_query(sample1, sample2)
-        # make 4 arrays for snp, indel, het, hom plots, for each metric
+        # make 4 lists for snp, indel, het, hom plots, for each metric
         # & make plot objects
         plots = make_plots(merged_data, metrics)
     else:
