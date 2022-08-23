@@ -132,8 +132,11 @@ dmypy.json
 *.vcf
 *.vcf.gz
 *.csi
-*.csv
-*.txt
+*.tbi
 
 # HTML output
 *.html
+
+# Test txt files
+*.txt
+*.csv
