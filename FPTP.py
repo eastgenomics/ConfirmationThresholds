@@ -458,6 +458,9 @@ def create_plot(plot_list, metric):
         {'Metric Value': values, 'TPFP': tpfp, 'Centile': centiles,
          'Variant Type': subset}
         )
+    # check whether dataframe actually contains data (otherwise will break fig)
+    if df.empty:
+        return None
     # make figure (facet_col tiles the datasets based on filter subset)
     fig = px.histogram(
         df, x='Metric Value', color='TPFP', facet_col='Variant Type',
@@ -689,7 +692,9 @@ def make_plots(data, metrics, happy=True):
         indel_hom.append('indel_hom')
         # make tiled figure
         fig = create_plot([snp_het, snp_hom, indel_het, indel_hom], metric)
-        plot_list.append(fig)
+        # only append if fig was actually created
+        if fig:
+            plot_list.append(fig)
     return plot_list
 
 
