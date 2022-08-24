@@ -307,6 +307,9 @@ def infer_het_hom(genotype):
     1 string
     RETURN
     1 string
+
+    TODO - this doesn't cover multiallelics e.g. 2/2 (next version as function
+    not used yet)
     '''
     if genotype == '0/0':
         hethom = 'homref'
@@ -460,6 +463,10 @@ def create_plot(plot_list, metric):
         )
     # check whether dataframe actually contains data (otherwise will break fig)
     if df.empty:
+        if VERBOSE:
+            print(f'\nThe metric labelled "{metric}" was requested and listed in '
+            'the VCF header, but could not be found in any records. Therefore no '
+            'plots can be generated for this metric.\n')
         return None
     # make figure (facet_col tiles the datasets based on filter subset)
     fig = px.histogram(
